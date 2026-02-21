@@ -1,0 +1,9 @@
+{
+    "_description": "avatar_items/{itemId} — Avatar kataloğu (admin seed)",
+    "id": "avatar_1",
+    "name": "Mavi Yıldız",
+    "imageUrl": "https://storage.googleapis.com/.../avatars/avatar_1.png",
+    "jetonCost": 0,
+    "is_free": true,
+    "display_order": 1
+}

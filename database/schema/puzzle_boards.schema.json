@@ -1,0 +1,37 @@
+{
+    "_description": "puzzle_boards/{boardId} — Puzzle görseli kataloğu (admin seed, 7 parçalı)",
+    "id": "puzzle_1",
+    "name": "Sihirli Orman",
+    "fullImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_full.png",
+    "totalPieces": 7,
+    "pieces": [
+        {
+            "index": 1,
+            "pieceImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_piece_1.png"
+        },
+        {
+            "index": 2,
+            "pieceImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_piece_2.png"
+        },
+        {
+            "index": 3,
+            "pieceImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_piece_3.png"
+        },
+        {
+            "index": 4,
+            "pieceImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_piece_4.png"
+        },
+        {
+            "index": 5,
+            "pieceImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_piece_5.png"
+        },
+        {
+            "index": 6,
+            "pieceImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_piece_6.png"
+        },
+        {
+            "index": 7,
+            "pieceImageUrl": "https://storage.googleapis.com/.../puzzles/puzzle_1_piece_7.png"
+        }
+    ]
+}

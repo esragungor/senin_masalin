@@ -1,0 +1,52 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Yardımcı Fonksiyon ────────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ── Masal Görselleri ─────────────────────────────────────────────────
+    // Path: stories/{userId}/{storyId}/{imageFile}
+    match /stories/{userId}/{storyId}/{imageFile} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if false; // Sadece backend (Admin SDK)
+    }
+
+    // ── Masal Ses Dosyaları (TTS) ─────────────────────────────────────────
+    // Path: audio/{userId}/{storyId}/{audioFile}
+    match /audio/{userId}/{storyId}/{audioFile} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if false; // Sadece backend
+    }
+
+    // ── Puzzle Görselleri (Giriş yapmış herkes okuyabilir) ────────────────
+    // Path: puzzles/{puzzleFile}
+    match /puzzles/{puzzleFile} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ── Rozet ve Başarım İkonları ─────────────────────────────────────────
+    // Path: badges/{badgeFile}
+    match /badges/{badgeFile} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ── Avatar Görselleri ─────────────────────────────────────────────────
+    // Path: avatars/{avatarFile}
+    match /avatars/{avatarFile} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ── Hazır Masal Görselleri ────────────────────────────────────────────
+    // Path: premade/{storyId}/{imageFile}
+    match /premade/{storyId}/{imageFile} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+  }
+}

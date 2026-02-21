@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Yardımcı Fonksiyonlar ──────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // KULLANICI KOLEKSIYONU
+    // Path: users/{userId}
+    // Backend: user.service.js → db.collection('users').doc(uid)
+    // ══════════════════════════════════════════════════════════════════════
+    match /users/{userId} {
+      // Kullanıcı kendi belgesini okuyabilir
+      allow read: if isOwner(userId);
+      // Sadece backend (Admin SDK) yazar — Flutter doğrudan yazamaz
+      allow write: if false;
+
+      // ── Kullanıcının Masalları (Subcollection) ─────────────────────────
+      // Path: users/{userId}/stories/{storyId}
+      // Backend: story.service.js → .collection('users').doc(uid).collection('stories')
+      match /stories/{storyId} {
+        allow read: if isOwner(userId);
+        allow write: if false; // Sadece backend
+      }
+
+      // ── Avatar Açılımları ──────────────────────────────────────────────
+      // Path: users/{userId}/avatar_unlocks/{itemId}
+      match /avatar_unlocks/{itemId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // HAZIR MASALLAR (Admin tarafından yüklenir)
+    // Path: premade_stories/{storyId}
+    // ══════════════════════════════════════════════════════════════════════
+    match /premade_stories/{storyId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // BAŞARIM KATALOĞU (Global, salt okunur)
+    // Path: achievements/{docId}
+    // ══════════════════════════════════════════════════════════════════════
+    match /achievements/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // AVATAR KATALOĞU (Global, salt okunur)
+    // Path: avatar_items/{itemId}
+    // Backend: gamification.service.js → db.collection('avatar_items')
+    // ══════════════════════════════════════════════════════════════════════
+    match /avatar_items/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // PUZZLE BOARD KATALOĞU (Global, salt okunur)
+    // Path: puzzle_boards/{boardId}
+    // ══════════════════════════════════════════════════════════════════════
+    match /puzzle_boards/{boardId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // JETON İŞLEMLERİ (Kullanıcı sadece kendi kayıtlarını okur)
+    // Path: jeton_transactions/{txId}
+    // Backend: user.service.js → db.collection('jeton_transactions').add(...)
+    // ══════════════════════════════════════════════════════════════════════
+    match /jeton_transactions/{txId} {
+      allow read: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // TTS KULLANIM SAYACI (Aylık limit — sadece backend)
+    // Path: tts_usage/{yearMonth}  örn: "2026-02"
+    // ══════════════════════════════════════════════════════════════════════
+    match /tts_usage/{month} {
+      allow read, write: if false;
+    }
+  }
+}

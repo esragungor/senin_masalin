@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "536032076114",
+    "project_id": "senin-masalin-128f2",
+    "storage_bucket": "senin-masalin-128f2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:536032076114:android:12bf025cbe70e63ea21a8b",
+        "android_client_info": {
+          "package_name": "com.seninmasalin.senin_masalin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJE-WirHfSklnkP1Ez3DYFvhLa6Tb_YY4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

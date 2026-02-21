@@ -1,0 +1,43 @@
+{
+    "_description": "users/{userId} — Kullanıcı profil belgesi",
+    "uid": "firebase_user_id",
+    "email": "user@example.com",
+    "displayName": "Ebeveyn Adı Soyadı",
+    "photoUrl": "https://storage.googleapis.com/.../avatars/avatar_1.png",
+    "jetonBalance": 50,
+    "createdAt": "timestamp",
+    "preferences": {
+        "nightMode": false
+    },
+    "stats": {
+        "storiesCreated": 15,
+        "totalStoriesRead": 42
+    },
+    "weeklyProgress": {
+        "count": 5,
+        "weekStartDate": "2026-02-17T00:00:00.000Z"
+    },
+    "puzzleProgress": {
+        "currentPuzzleId": 1,
+        "collectedPieces": 4,
+        "pieceIndices": [
+            1,
+            3,
+            5,
+            7
+        ],
+        "lastPieceDate": "2026-02-21"
+    },
+    "badges": [
+        "weekly_master_2026-02-17"
+    ],
+    "completedAchievements": [
+        "ach_1",
+        "ach_2"
+    ],
+    "completedPuzzles": [],
+    "presetAchievements": [
+        "preset_premade_story_1"
+    ],
+    "lastTaleAt": "2026-02-21T15:30:00.000Z"
+}

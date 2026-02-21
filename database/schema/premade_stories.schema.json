@@ -1,0 +1,42 @@
+{
+    "_description": "premade_stories/{storyId} — Admin tarafından yüklenen hazır masallar (salt okunur)",
+    "storyId": "premade_1",
+    "isPremade": true,
+    "title": "Küçük Kaplumbağa ve Deniz",
+    "description": "Sabır ve azmin güzelliğini anlatan bir deniz masalı.",
+    "coverImageUrl": "https://storage.googleapis.com/.../premade/premade_1/cover.png",
+    "ageMin": 3,
+    "ageMax": 7,
+    "theme": "Deniz macerası",
+    "isActive": true,
+    "displayOrder": 1,
+    "content": {
+        "segments": [
+            {
+                "order": 1,
+                "text": "...",
+                "imageUrl": "...",
+                "audioUrl": "..."
+            },
+            {
+                "order": 2,
+                "text": "...",
+                "imageUrl": "...",
+                "audioUrl": "..."
+            },
+            {
+                "order": 3,
+                "text": "...",
+                "imageUrl": "...",
+                "audioUrl": "..."
+            },
+            {
+                "order": 4,
+                "text": "...",
+                "imageUrl": "...",
+                "audioUrl": "..."
+            }
+        ]
+    },
+    "createdAt": "timestamp"
+}

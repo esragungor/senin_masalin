@@ -1,0 +1,53 @@
+{
+    "_description": "users/{userId}/stories/{storyId} — Kaydedilmiş masal belgesi",
+    "storyId": "12345678",
+    "userId": "firebase_user_id",
+    "isPremade": false,
+    "savedAt": "timestamp",
+    "input": {
+        "childName": "Ayşe",
+        "age": 5,
+        "gender": "kız",
+        "theme": "Orman macerası",
+        "companion": "Konuşan tavşan",
+        "specialObject": "Sihirli fener",
+        "moral": "Dostluk ve cesaret"
+    },
+    "content": {
+        "title": "Ayşe'nin Sihirli Orman Macerası",
+        "segments": [
+            {
+                "order": 1,
+                "text": "Bir varmış, bir yokmuş...",
+                "imageUrl": "https://storage.googleapis.com/.../stories/uid/storyId/images/page_0.png",
+                "imagePrompt": "Cute magical forest, Pixar style, vibrant colors, 3d render, soft lighting..."
+            },
+            {
+                "order": 2,
+                "text": "...",
+                "imageUrl": "...",
+                "imagePrompt": "..."
+            },
+            {
+                "order": 3,
+                "text": "...",
+                "imageUrl": "...",
+                "imagePrompt": "..."
+            },
+            {
+                "order": 4,
+                "text": "...",
+                "imageUrl": "...",
+                "imagePrompt": "..."
+            }
+        ],
+        "audioUrl": "https://storage.googleapis.com/.../audio/uid/storyId/story.mp3"
+    },
+    "metadata": {
+        "isFavorite": false,
+        "readProgress": 4,
+        "isCompleted": true,
+        "lastReadAt": "timestamp",
+        "readCount": 2
+    }
+}
