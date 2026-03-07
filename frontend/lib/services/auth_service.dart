@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// Firebase Auth servisi.
@@ -21,32 +22,40 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final credential = await _auth.createUserWithEmailAndPassword(
-      email: email.trim(),
-      password: password,
-    );
+    try {
+      debugPrint('[AuthService] registerWithEmail başlatıldı: $email');
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
 
-    final user = credential.user!;
+      final user = credential.user!;
+      debugPrint('[AuthService] Kullanıcı oluşturuldu: ${user.uid}');
 
-    // İsim güncelle
-    await user.updateDisplayName('$ad $soyad');
+      // İsim güncelle
+      await user.updateDisplayName('$ad $soyad');
 
-    // Firestore'a kullanıcı belgesi oluştur
-    await _firestore.collection('users').doc(user.uid).set({
-      'uid': user.uid,
-      'ad': ad.trim(),
-      'soyad': soyad.trim(),
-      'email': email.trim(),
-      'displayName': '$ad $soyad',
-      'photoURL': null,
-      'createdAt': FieldValue.serverTimestamp(),
-      'termsAccepted': true,
-      'authProvider': 'email',
-      // Uygulama alanları (başlangıç değerleri)
-      'jetonlar': 0,
-      'toplamMasal': 0,
-      'seviye': 1,
-    });
+      // Firestore'a kullanıcı belgesi oluştur
+      await _firestore.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'ad': ad.trim(),
+        'soyad': soyad.trim(),
+        'email': email.trim(),
+        'displayName': '$ad $soyad',
+        'photoURL': null,
+        'createdAt': FieldValue.serverTimestamp(),
+        'termsAccepted': true,
+        'authProvider': 'email',
+        'jetonlar': 0,
+        'toplamMasal': 0,
+        'seviye': 1,
+      });
+      debugPrint('[AuthService] Firestore kaydı tamamlandı.');
+    } catch (e, st) {
+      debugPrint('[AuthService] registerWithEmail HATA: $e');
+      debugPrint('[AuthService] StackTrace: $st');
+      rethrow;
+    }
   }
 
   // ── Email ile Giriş ───────────────────────────────────
@@ -54,10 +63,18 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    await _auth.signInWithEmailAndPassword(
-      email: email.trim(),
-      password: password,
-    );
+    try {
+      debugPrint('[AuthService] signInWithEmail başlatıldı: $email');
+      await _auth.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      debugPrint('[AuthService] signInWithEmail başarılı.');
+    } catch (e, st) {
+      debugPrint('[AuthService] signInWithEmail HATA: $e');
+      debugPrint('[AuthService] StackTrace: $st');
+      rethrow;
+    }
   }
 
   // ── Google ile Giriş/Kayıt ────────────────────────────
@@ -67,6 +84,8 @@ class AuthService {
   static Future<Map<String, dynamic>> signInWithGoogle({
     bool termsAccepted = false,
   }) async {
+    try {
+    debugPrint('[AuthService] signInWithGoogle başlatıldı.');
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) throw Exception('Google girişi iptal edildi.');
 
@@ -102,7 +121,13 @@ class AuthService {
       });
     }
 
+    debugPrint('[AuthService] signInWithGoogle başarılı. isNewUser=$isNew');
     return {'user': user, 'isNewUser': isNew};
+    } catch (e, st) {
+      debugPrint('[AuthService] signInWithGoogle HATA: $e');
+      debugPrint('[AuthService] StackTrace: $st');
+      rethrow;
+    }
   }
 
   // ── Çıkış ────────────────────────────────────────────

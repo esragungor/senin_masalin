@@ -1,0 +1,3 @@
+FIELDS: storyId, input, content, userId, isPremade, metadata, savedAt
+CONTENT FIELDS: title, segments
+METADATA FIELDS: isFavorite, readCount

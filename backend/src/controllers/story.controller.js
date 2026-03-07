@@ -19,8 +19,9 @@ export const createStory = async (req, res) => {
         res.json({
             success: true,
             story: result.content,
+            storyId: result.storyId,
             puzzleEligible: result.puzzleEligible,
-            isSaved: false,
+            isSaved: result.isSaved,
             message: result.message
         });
 
@@ -37,7 +38,23 @@ export const createStory = async (req, res) => {
             });
         }
 
-        res.status(500).json({ error: error.message });
+        // Limit hatası
+        if (error.message === 'LIMIT_REACHED') {
+            return res.status(403).json({
+                error: 'Masal limitine ulaştın! Yeni bir masal oluşturmak için mevcut masallarından birini silmelisin.',
+                code: 'LIMIT_REACHED'
+            });
+        }
+
+        // Quota / Rate Limit hatası (429)
+        if (error.status === 429 || error.message?.includes('429') || error.message?.includes('QuotaExceeded')) {
+            return res.status(429).json({
+                error: 'Sistem şu an çok yoğun. Lütfen 15 saniye sonra tekrar dene.',
+                code: 'QUOTA_EXCEEDED'
+            });
+        }
+
+        res.status(500).json({ error: error.message || 'Bir iç sunucu hatası oluştu.' });
     }
 };
 

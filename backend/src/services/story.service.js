@@ -8,10 +8,15 @@ const COOLDOWN_SECONDS = 30; // İki masal arası bekleme süresi
 class StoryService {
 
     /**
-     * Generate 8-digit story ID
+     * Generate 10-character alphanumeric story ID
      */
     generateStoryId() {
-        return Math.floor(10000000 + Math.random() * 90000000).toString();
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 10; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
     }
 
     /**
@@ -47,6 +52,12 @@ class StoryService {
                 throw new Error(`COOLDOWN:${cooldown.waitSeconds}`);
             }
 
+            // 1.5. Masal limiti kontrolü (Max 10)
+            const storyCount = await this.countUserStories(userId);
+            if (storyCount >= 10) {
+                throw new Error('LIMIT_REACHED');
+            }
+
             // 2. Puzzle için günlük eligibility kontrol
             const isFirstDailyStory = await gamificationService.checkDailyPuzzleEligibility
                 ? await gamificationService.checkDailyPuzzleEligibility(userId)
@@ -70,21 +81,18 @@ class StoryService {
                 throw new Error('Masal üretilemedi');
             }
 
-            // 5. Sonucu döndür — kaydetme
+            // 5. Masalı Kaydetmeden Dön (Artık kullanıcı manuel kaydedecek)
             const storyData = {
-                userId: userId,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 input: storyParams,
                 content: generatedContent,
-                isPremade: false,
-                metadata: { isFavorite: false, readCount: 0 }
             };
 
             return {
                 ...storyData,
                 isSaved: false,
+                storyId: null, // Henüz kaydedilmediği için ID yok
                 puzzleEligible: puzzleEligible,
-                message: 'Masal oluşturuldu! Kitaplığa eklemek için "Kitaplığa Ekle" butonuna bas.'
+                message: 'Masal başarıyla oluşturuldu! ✨'
             };
 
         } catch (error) {
@@ -119,7 +127,7 @@ class StoryService {
         const snapshot = await db.collection('users')
             .doc(userId)
             .collection('stories')
-            .orderBy('createdAt', 'desc')
+            .orderBy('savedAt', 'desc')
             .get();
 
         console.log(`📖 Found ${snapshot.docs.length} stories in Firestore`);
@@ -142,12 +150,18 @@ class StoryService {
         }
 
         await storyRef.delete();
+        console.log(`✅ Story ${storyId} deleted from Firestore`);
 
-        // Görselleri Storage'dan sil
-        const bucket = admin.storage().bucket();
-        await bucket.deleteFiles({
-            prefix: `users/${userId}/stories/${storyId}/`
-        });
+        // Görselleri Storage'dan silmeye çalış (hata olursa görmezden gel)
+        try {
+            const bucket = admin.storage().bucket();
+            await bucket.deleteFiles({
+                prefix: `users/${userId}/stories/${storyId}/`
+            });
+            console.log(`🗑️ Storage files deleted for story ${storyId}`);
+        } catch (storageError) {
+            console.warn(`⚠️ Could not delete storage files for ${storyId}: ${storageError.message}`);
+        }
 
         return true;
     }

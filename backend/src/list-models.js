@@ -6,15 +6,13 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 async function listModels() {
     try {
+        // There is no listModels in the official Node SDK directly sometimes, wait...
+        // Actually you can fetch from REST API.
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
         const data = await response.json();
-        console.log("--- SENİN KEYİNİN GÖREBİLDİĞİ MODELLER ---");
-        data.models.forEach(m => console.log(m.name));
-    } catch (e) {
-        console.error("Modeller listelenirken hata oluştu:", e.message);
+        console.log(data);
+    } catch (error) {
+        console.error(error);
     }
 }
-
 listModels();
-
-

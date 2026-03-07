@@ -77,7 +77,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // ── Kayıt Ol (Email/Şifre) ──────────────────────────
   Future<void> _onKayitOl() async {
     if (!_validate()) return;
-    setState(() { _isLoading = true; _generalError = null; });
+    setState(() {
+      _isLoading = true;
+      _generalError = null;
+    });
     try {
       await AuthService.registerWithEmail(
         ad: _nameController.text.trim(),
@@ -107,7 +110,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // ── Google ile Kayıt ─────────────────────────────────
   Future<void> _onGoogleKayit() async {
     if (!_validate(forGoogle: true)) return;
-    setState(() { _isGoogleLoading = true; _generalError = null; });
+    setState(() {
+      _isGoogleLoading = true;
+      _generalError = null;
+    });
     try {
       await AuthService.signInWithGoogle(termsAccepted: true);
       if (mounted) context.go('/home');
@@ -115,13 +121,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() => _generalError = AuthService.getErrorMessage(e.code));
     } catch (e) {
       if (!e.toString().contains('iptal')) {
-        setState(() => _generalError = 'Google ile kayıt başarısız. Tekrar dene.');
+        setState(
+            () => _generalError = 'Google ile kayıt başarısız. Tekrar dene.');
       }
     } finally {
       if (mounted) setState(() => _isGoogleLoading = false);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -356,7 +362,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         )
                       : const Text(
-                          'Kayıt Ol 🪄',
+                          'Kayıt Ol',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -407,8 +413,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('Zaten hesabın var mı?',
-                      style:
-                          TextStyle(fontSize: 14, color: Colors.grey[500])),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[500])),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: TextButton.styleFrom(

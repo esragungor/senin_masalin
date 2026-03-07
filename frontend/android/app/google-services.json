@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "536032076114-cdm3qgjq24jl791c574lm25b26jtm868.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.seninmasalin.senin_masalin",
+            "certificate_hash": "9b6a6157955fa5a714724f11bf93f4b27437c8fb"
+          }
+        },
+        {
           "client_id": "536032076114-g197tdgtklbvslven7nsbvbdirimhhbh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

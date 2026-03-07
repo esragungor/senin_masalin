@@ -1,0 +1,290 @@
+[
+  {
+    "id": "veLX88vmbf",
+    "storyId": "veLX88vmbf",
+    "input": {
+      "childName": "eren",
+      "age": 4,
+      "gender": "erkek",
+      "theme": "korsanlar",
+      "companion": "ikiz kardesi ece",
+      "specialObject": "spiderman",
+      "moral": "Yardımlaşma"
+    },
+    "content": {
+      "title": "Kaptan Eren ve Renkli Sırt Çantasının Hazine Macerası",
+      "segments": [
+        {
+          "order": 1,
+          "text": "Bir varmış, bir yokmuş. Masmavi denizlerin kenarında, neşeli bir kasabada Eren adında minik bir korsan yaşarmış. Eren, kırmızı şapkasını takıp kendini kocaman bir geminin kaptanı gibi hissederdi. Onun en sevgili dostu, rengarenk bir sırt çantasıydı. Çantanın içinde bazen oyuncak bir dürbün, bazen de gizemli bir harita olurdu. Eren, sırt çantasını takınca 'Vay! Ben Kaptan Eren!' diye bağırır, etrafta koşuştururdu. Şıpır şıpır adımlarıyla dünyayı keşfetmeye hazırdı!",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d0cd/EIiXaCxpH7tgzvmT4VY1p.jpg"
+        },
+        {
+          "order": 2,
+          "text": "Bir güneşli öğleden sonra, Eren sırt çantasıyla bahçede dolaşırken, ikiz kardeşi Ece ile karşılaştı. Ece, elinde küçük bir kürek tutuyordu. 'Eren, nereye gidiyorsun?' diye sordu Ece, gözleri parlayarak. Eren, 'Korsan macerasına! Hazine arayacağız! Sen de benimle gelmek ister misin, küçük denizci?' diye coşkuyla sordu. Ece neşeyle zıpladı: 'Evet, evet! Ben de gelirim! Benim de süper güçlü küreğim var!' İki kardeş, tıpır tıpır adımlarla bahçenin derinliklerine doğru yola çıktılar.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d0cd/5seQguVUWuFst3mMvxSRX.jpg"
+        },
+        {
+          "order": 3,
+          "text": "Bahçenin sonunda, kocaman bir kum tepesi vardı. Eren gözlerini kısıp etrafa baktı: 'İşte! Hazine kesinlikle bu kumların altında!' dedi. Hemen küreğini çıkardı ve kumları kazmaya başladı: 'Hııh, hııh!' Ama kumlar çok ağırdı, Eren tek başına kazmakta zorlanıyordu. 'Oooofff!' diye mırıldandı. Ece, Eren'in zorlandığını gördü. 'Eren, dur! Ben de sana yardım edeyim mi?' diye sordu. Eren gülümsedi: 'Evet! İki kişi olunca daha hızlı oluruz! Ne dersin?' Ece hemen kendi küçük küreğini aldı, birlikte 'Hop! Hop!' diye neşeyle kumları kazmaya başladılar.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d0cc/jQG3svg-2GqcNoJ5V5Tty.jpg"
+        },
+        {
+          "order": 4,
+          "text": "Birlikte çalıştıkça, kumlar daha kolay açıldı. Birden, 'Tık!' diye bir ses duydular. Kazdıkça kazdılar ve minicik, pırıl pırıl parlayan, rengarenk bir deniz kabuğu buldular! 'Vay canına!' diye bağırdılar sevinçle. Eren, 'Birlikte çok güzel bir hazine bulduk!' dedi. Ece de gülümsedi: 'Evet! Yardımlaşınca her şey daha kolay ve çok daha eğlenceliymiş!' Akşam olunca, Eren ve Ece, rengarenk sırt çantaları ve parlayan deniz kabuklarıyla evlerine döndüler. Tatlı rüyalar görmek için yataklarına girdiler. Yarın yeni maceralar onları bekliyordu ve biliyorlardı ki birlikte çalışmak, en büyük hazineydi!",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d0cd/fXJlElJgqjHKdEZdePOhG.jpg"
+        }
+      ]
+    },
+    "userId": "LYVbVmaOxuRrWSaj0XRDDvBNplX2",
+    "isPremade": false,
+    "metadata": {
+      "isFavorite": false,
+      "readCount": 0
+    },
+    "savedAt": {
+      "_seconds": 1772627983,
+      "_nanoseconds": 382000000
+    }
+  },
+  {
+    "id": "VhwsrBCoia",
+    "storyId": "VhwsrBCoia",
+    "input": {
+      "childName": "esra",
+      "age": 3,
+      "gender": "kız",
+      "theme": "zaman",
+      "companion": "kardesi volkan",
+      "specialObject": "spiderman",
+      "moral": "Arkadaşlık"
+    },
+    "content": {
+      "title": "Esra'nın Renkli Çantası ve Minik Dostluk Hikayesi",
+      "segments": [
+        {
+          "order": 1,
+          "text": "Bir varmış, bir yokmuş, yemyeşil çimenlerin üstünde cıvıl cıvıl kuşların uçuştuğu, rengarenk çiçeklerin açtığı mutlu bir evde, minicik Esra yaşarmış. Esra 3 yaşındaydı ve dünyada en çok sevdiği şey, pırıl pırıl parlayan, rengarenk sırt çantasıydı. Bu çanta sıradan değildi, hayır hayır! Esra ne zaman çantasına dokunsa, içinden minik bir 'cıst cıst' sesi gelir, sonra gökkuşağı renklerinde ışıklar 'fırıl fırıl' dönerdi. Sanki çanta, en güzel anları, en özel zamanları içine saklardı.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d033/QcIJZrPsczlgvwo3Iwl0k.jpg"
+        },
+        {
+          "order": 2,
+          "text": "Bir sabah Esra, sırt çantasını 'tık tık tık' diye sırtına taktı ve 'Haydi çantam, macera zamanı!' diye fısıldadı. 'Pıt pıt pıt' adımlarla bahçeye çıktı. Orada kim vardı biliyor musunuz? Abisi Volkan! Volkan, kocaman, üst üste bloklarla kule yapmaya çalışıyordu, 'hıh hıh' diye nefes nefese. Esra, 'Abiii, ne yapıyorsun?' diye sordu merakla. Volkan, 'Kule yapıyorum, ama yıkılıyor, 'puf!' diye,' dedi üzgün bir sesle. Esra, 'Ben de yapayım mı?' diye sordu. Volkan'ın yüzü güldü, 'Evet, evet! Beraber yapalım!'",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d033/KRv4ujnWjZ_c18HquwerM.jpg"
+        },
+        {
+          "order": 3,
+          "text": "Esra ve Volkan, kulenin başına oturdular. Volkan bir blok koydu, Esra da hevesle bir blok koydu. Ama bir blok birden devrildi, 'çatır çutur!' Kule yeniden 'hop!' diye yıkıldı. Volkan'ın gözleri doldu, 'Püfff, olmuyor ki!' dedi. Esra, abisinin üzülmesine dayanamadı. Sırt çantası 'pırıl pırıl' parladı. İçinden minicik bir resim belirdi: Esra ve Volkan el ele tutuşmuş, kocaman gülüyorlardı! Çanta sanki onlara fısıldadı: 'Birlikte daha güçlüsünüz! El ele!'' Esra, 'Abiii, dur,' dedi, 'Önce sen koy, sonra ben! Sırayla!' Volkan, 'Tamam,' dedi. 'Sen destek ol, ben koyayım.'",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d033/H7Ak2HvHpPHMJCQ699TSX.jpg"
+        },
+        {
+          "order": 4,
+          "text": "Esra ve Volkan, 'Bir, iki, üç!' diye sayarak blokları dikkatlice üst üste koydular. Volkan koca blokları sağlamca yerleştirdi, Esra da küçük blokları yanlardan 'tıkır tıkır' destekledi. Ve işte! Kocaman, upuzun bir kule! 'Yaşasın!' diye bağırdılar, 'Gülüş gülüş!' Kule ayakta duruyordu. Esra, abisine kocaman sarıldı, 'En iyi arkadaşım sensin Volkan!' Volkan da Esra'ya sarıldı, 'Sen de benim, Esra!' İkisi de gülerek oyunlarına devam ettiler. Esra'nın sırt çantası da 'pırıl pırıl' parlıyordu, çünkü içinde o güzelim dostluk zamanı artık güvenle saklıydı.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90d033/m6zNbRve0f59ebM0s2b-Q.jpg"
+        }
+      ]
+    },
+    "userId": "LYVbVmaOxuRrWSaj0XRDDvBNplX2",
+    "isPremade": false,
+    "metadata": {
+      "isFavorite": false,
+      "readCount": 0
+    },
+    "savedAt": {
+      "_seconds": 1772626439,
+      "_nanoseconds": 582000000
+    }
+  },
+  {
+    "id": "l9CwK6FiQh",
+    "storyId": "l9CwK6FiQh",
+    "input": {
+      "childName": "esra",
+      "age": 5,
+      "gender": "kız",
+      "theme": "hayvanlar",
+      "companion": "kardesi eren",
+      "specialObject": "ironman",
+      "moral": "Paylaşmak"
+    },
+    "content": {
+      "title": "Esra ve Paylaşan Renkli Sırt Çantası",
+      "segments": [
+        {
+          "order": 1,
+          "text": "Bir varmış, bir yokmuş, kocaman bir ormanın kenarında, rengarenk çiçeklerle dolu minicik bir evde Esra adında şirin mi şirin bir kız yaşarmış. Esra 5 yaşındaymış. Gözleri pırıl pırıl, yanakları al almış. Esra'nın en sevdiği şeyi ne biliyor musunuz? Sırtındaki o rengarenk sırt çantasıymış! Çanta öyle özelmiş ki, her yürüyüşünde hafifçe 'şıkır şıkır' sesler çıkarır, içinden bazen rengarenk kurdeleler, bazen de mis kokulu çiçekler çıkarmış. Esra, bu çantasıyla her gün ormanda gezintiye çıkarmış. Yanında da hep biricik kardeşi Eren olurmuş. Eren de Esra'ya ‘ıpış ıpış’ yürür, ablalarının peşini hiç bırakmazmış.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cf6b/5AEPF2JTPM61EEMCSQsZ9.jpg"
+        },
+        {
+          "order": 2,
+          "text": "Bir gün Esra, sırt çantasını takıp 'hadi eren, yeni bir macera başlasın!' diye seslenmiş. Eren de 'macera! macera!' diye sevinçle zıplamış, 'pıt pıt pıt' diye ablasının peşine düşmüş. Birlikte ormanın içine doğru yürürken, ağaçların tepesinde hızla koşan minicik bir sincap görmüşler. Sincap, minik elleriyle bir cevizi 'tık tık tık' diye yere düşürmüş, sonra da telaşla etrafa bakınmış. 'Merhaba sincap kardeş!' demiş Esra. Sincap 'cııık cııık' diye karşılık vermiş, cevizi bulamayınca üzgün üzgün duruyormuş.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cf6b/iu0sKiXjOMKuIVfimwV3x.jpg"
+        },
+        {
+          "order": 3,
+          "text": "Esra, sincabın üzgün halini görünce içinden bir şeyler yapmak gelmiş. Sırt çantasını yere koymuş, 'tırtıl tırtıl' fermuarını açmış. İçinden mis gibi kokan, kocaman bir kurabiye çıkarmış! 'Aaa kurabiyeeee!' demiş Eren sevinçle. Sincap da kurabiyeyi görünce gözlerini 'fırıl fırıl' açmış. Esra önce kurabiyeyi kendisi yemek istemiş. 'Bu benim kurabiyem!' diye düşünmüş. Ama sonra sincabın minik burnunu havaya kaldırıp 'cııık cııık' dediğini görmüş. Eren de küçük elleriyle kurabiyeyi işaret etmiş, o da biraz istemiş. Esra'nın kalbi 'pıt pıt pıt' atmış. Ne yapacaktı şimdi?",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cf6b/0bK4ZWc0H2sfWZb5LwtO5.jpg"
+        },
+        {
+          "order": 4,
+          "text": "Esra, birden kocaman gülümsemiş. 'Durun bakalım!' demiş. Kocaman kurabiyeyi dikkatlice üçe bölmüş. Bir parçasını sincaba uzatmış. Sincap 'fıkır fıkır' zıplayarak kurabiyeyi almış, 'hapır hupur' yemiş. Bir parçasını da Eren'e vermiş. Eren de 'mmmmmh' diye keyifle kurabiyesini yemiş. Esra da kendi parçasını yerken, kalbinin sıcacık olduğunu hissetmiş. Herkes çok mutluymuş! Sincap 'cııık cııık' diye teşekkür etmiş. Esra ve Eren, artık karınları tok, kalpleri neşeyle dolu bir şekilde 'tak tak tak' adımlarla evlerine dönmüşler. Esra anlamış ki, paylaşmak dünyanın en güzel şeyiymiş. Renkli sırt çantası da 'şıpır şıpır' sesler çıkararak sanki Esra'yı tebrik ediyormuş.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cf6b/v5yzD_yAfQqQ374bBoK87.jpg"
+        }
+      ]
+    },
+    "userId": "LYVbVmaOxuRrWSaj0XRDDvBNplX2",
+    "isPremade": false,
+    "metadata": {
+      "isFavorite": false,
+      "readCount": 0
+    },
+    "savedAt": {
+      "_seconds": 1772624441,
+      "_nanoseconds": 835000000
+    }
+  },
+  {
+    "id": "6CMa2Fs8Wa",
+    "storyId": "6CMa2Fs8Wa",
+    "input": {
+      "childName": "esra",
+      "age": 7,
+      "gender": "kız",
+      "theme": "bulutlar",
+      "companion": "sevgilisi alperen",
+      "specialObject": "spiderman",
+      "moral": "Sabırlı olmak"
+    },
+    "content": {
+      "title": "Esra ve Sabır Bulutu Macerası",
+      "segments": [
+        {
+          "order": 1,
+          "text": "Bir varmış, bir yokmuş, gökyüzünün yere en yakın göründüğü, yemyeşil çayırlarla bezeli şirin bir köyde Esra adında, gözleri pırıl pırıl parlayan yedi yaşında bir kız yaşarmış. Esra, özellikle de gökyüzündeki bembeyaz, pamuk gibi bulutlara bakmaya bayılırmış. Onlara baktıkça kimi zaman bir at, kimi zaman kocaman bir fil, kimi zaman da uçan bir gemi hayal edermiş. Esra'nın en yakın arkadaşı ise, sırtında taşıdığı rengârenk, ışıl ışıl parlayan sihirli bir sırt çantasıymış. Bu çanta, Esra heyecanlandığında veya bir şeyleri çok merak ettiğinde hafifçe titrer, içinden tatlı bir melodi yayılırmış. Sanki Esra'nın kalbindeki bütün heyecanları hisseder gibiymiş. Bugün de Esra, 'Acaba bu bulutlar nereye gidiyor?' diye düşünerek gökyüzüne bakarken, çantası neşeyle kıpır kıpır etmiş.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cedc/O3d4lhh6fSfCLFbhVYgvH.jpg"
+        },
+        {
+          "order": 2,
+          "text": "Esra, bulutların sırrını çözmeye karar vermiş! Rengârenk çantasını sırtına takıp, köyün kenarındaki patikadan yürümeye başlamış. Çok geçmeden, en yakın arkadaşı Alperen'le karşılaşmış. Alperen de gökyüzüne bakıp iç geçiriyormuş. 'Nereye böyle Esra?' diye sormuş Alperen. Esra gülümseyerek cevap vermiş: 'Bulutları takip ediyorum, Alperen! Onların gizli diyarına gidiyorum. Gelmek ister misin?' Alperen'in gözleri parlamış. 'Tabii ki! Belki dev pamuk şekerler buluruz!' demiş. Esra'nın çantası bu fikre çok sevinmiş gibi hafifçe sallanmış ve rengarenk ışıkları daha da parlaklaşmış. İki arkadaş el ele tutuşup, gökyüzündeki en kabarık bulutları takip ederek maceraya atılmışlar.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cedc/2Ft6gBNxkkZoH39xbNpYl.jpg"
+        },
+        {
+          "order": 3,
+          "text": "Yürüye yürüye yemyeşil bir tepenin yamacına gelmişler. Başlarının hemen üstünde, sanki dokunabilecekleri kadar yakın duran, bembeyaz ve pofuduk bir bulut varmış. Esra, 'İşte o! Onu yakalayalım!' diye heyecanla bağırmış ve buluta doğru koşmaya başlamış. Zıplamış, zıplamış ama bulut her seferinde sanki biraz daha uzaklaşıyormuş. Esra koşmaktan yorulmuş, nefes nefese kalmış ve biraz da sinirlenmiş. 'Neden yakalayamıyorum ki? Neden hep benden kaçıyor?' diye söylenmiş. Tam o sırada Alperen, Esra'nın omzuna dokunmuş. 'Esra,' demiş, 'Belki de yakalamak yerine beklemeliyiz? Bak, o bulut çok yavaş hareket ediyor. Belki bize doğru geliyordur ama biz çok aceleci davrandığımız için fark etmiyoruzdur.' Esra'nın rengârenk çantası, bu sözler üzerine yumuşacık bir ışık yaymış, sanki 'Evet, sabır...' der gibiymiş. Esra, Alperen'in dediğini dinlemiş ve ikisi de çimlerin üzerine oturup sabırla bulutu izlemeye başlamışlar.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cedc/iufS_eISy2tGIUBWE83xY.jpg"
+        },
+        {
+          "order": 4,
+          "text": "Esra ve Alperen, çimlerin üzerinde uzanmış, nefeslerini bile tutarak bulutu izlemişler. Gerçekten de, bulut çok ama çok yavaş bir şekilde onlara doğru süzülüyormuş. Sanki bir sır fısıldar gibi usulca yaklaşmış. Sonunda, bulut tepelerinin tam üzerine geldiğinde, yüzlerinde serin, hafif bir nem hissetmişler. Sanki bulut onlara tatlı bir öpücük kondurmuş. Onu 'yakalayamamışlar' ama çok daha güzel bir şekilde 'hissetmişlerdi'. Esra, Alperen'e dönüp gülümsemiş. 'Haklıydın Alperen,' demiş. 'Beklemek çok daha güzelmiş. Bulut bize geldi!' Rengârenk çanta da mutlulukla parlamış. Esra, sabretmenin ve bazı şeylerin zamanla, acele etmeden çok daha güzel olduğunu o gün bulutlardan öğrenmiş. Eve dönerken, içleri huzur doluymuş. Artık biliyorlarmış ki, bazı güzellikler için sadece biraz sabırlı olmak yeterliymiş.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90cedc/X-rwytij9qyqe1yhDnSCx.jpg"
+        }
+      ]
+    },
+    "userId": "LYVbVmaOxuRrWSaj0XRDDvBNplX2",
+    "isPremade": false,
+    "metadata": {
+      "isFavorite": false,
+      "readCount": 0
+    },
+    "savedAt": {
+      "_seconds": 1772623012,
+      "_nanoseconds": 569000000
+    }
+  },
+  {
+    "id": "sH4i971g4N",
+    "storyId": "sH4i971g4N",
+    "input": {
+      "childName": "dsa",
+      "age": 5,
+      "gender": "erkek",
+      "theme": "denizalti",
+      "companion": "asd",
+      "specialObject": "asd",
+      "moral": "dsa"
+    },
+    "content": {
+      "title": "dsa'nın Renkli Sırt Çantası ve Denizaltı Dostları",
+      "segments": [
+        {
+          "order": 1,
+          "text": "Bir varmış, bir yokmuş, masmavi, pırıl pırıl denizin altında, şirin mi şirin bir evde küçük dsa yaşarmış. dsa, denizin tüm sırlarını merak eden, pıt pıt atan minicik bir kalbe sahipti. En sevdiği oyuncağı ise rengarenk bir sırt çantasıydı. Bu sırt çantası ne zaman bir macera zamanı gelse, ışıl ışıl parlar, 'Haydi! Haydi!' diye sanki fısıldarmış. dsa, sırt çantasının her parlayışında kalbi 'güm güm' atarmış!",
+          "imageUrl": "https://v3b.fal.media/files/b/0a909378/z7xAIsISEeTE6k-BsjLGa.jpg"
+        },
+        {
+          "order": 2,
+          "text": "Bir sabah, dsa kahvaltısını bitirir bitirmez, sırt çantası yine 'Fışır fışır!' diye parlamaya başladı. dsa hemen çantasını sırtına taktı. 'Hıp hıp, hazırız!' dedi. Tam evden çıkacakken, camdan içeri neşeli bir 'Cik cik!' sesi geldi. Bu sesi çıkaran, dsa'nın en yakın arkadaşı asd'ydi! asd, küçücük, sevimli bir denizatıydı. 'Merhaba asd!' dedi dsa. 'Baksana, sırt çantamız yeni bir yer keşfetmek istiyor!' asd de 'Şıp şıp!' diye kuyruğunu sallayarak onayladı. İkisi beraber yavaşça, merakla ilerlediler.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a909378/wH19EIyn4l3SDA8ysylA0.jpg"
+        },
+        {
+          "order": 3,
+          "text": "Sırt çantası 'Tıkır tıkır' diye yol gösterirken, dsa ve asd kendilerini biraz karanlık, rengarenk mercanların olduğu bir yere geldiler. Birden, uzakta minicik, parıldayan bir şey gördüler. 'Aaa, o da ne?' diye fısıldadı dsa. Yaklaştıklarında gördüler ki, küçük bir deniz yıldızı, büyük bir kayanın arasına sıkışmış, üzgün üzgün duruyordu. 'Vay canına, deniz yıldızı zor durumda!' dedi asd. Sırt çantası da 'Pıt pıt! Yardım et! Yardım et!' diye parladı daha hızlı. dsa ve asd birbirlerine baktılar. asd nazikçe burnuyla kayayı itti, dsa da sırt çantasından çıkan minik bir kepçeyle deniz yıldızına yardım etti. Minicik eller, minicik kuyruk, koca bir kayayı hareket ettirmeyi başardılar! Çünkü birlikte çok güçlülerdi!",
+          "imageUrl": "https://v3b.fal.media/files/b/0a909378/_3aINJBizTHmvatIn78iS.jpg"
+        },
+        {
+          "order": 4,
+          "text": "'Ohh, yaşasın!' Deniz yıldızı, kayadan kurtulunca neşe içinde 'Pırıl pırıl!' parladı ve 'Teşekkür ederim, teşekkür ederim!' diye onlara gülümsedi. dsa ve asd çok mutlu oldular. Sırt çantası da 'Şen şakrak!' diye parlayıp onayladı. Deniz yıldızına el sallayıp, evlerine doğru keyifli keyifli yüzdüler. dsa o gün anladı ki, arkadaşlarla birlikte birine yardım etmek, dünyadaki en güzel şeydi. Ve birlikte keşfetmek, birlikte yardım etmek çok ama çok eğlenceliydi! dsa yatağına uzanırken, sırt çantası da yanına kıvrıldı, tatlı rüyalar diledi.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a909378/lkV_TWszgCeEhkFUsaM-H.jpg"
+        }
+      ]
+    },
+    "userId": "LYVbVmaOxuRrWSaj0XRDDvBNplX2",
+    "isPremade": false,
+    "metadata": {
+      "isFavorite": false,
+      "readCount": 0
+    },
+    "savedAt": {
+      "_seconds": 1772470970,
+      "_nanoseconds": 785000000
+    }
+  },
+  {
+    "id": "ARrh5FayAl",
+    "storyId": "ARrh5FayAl",
+    "input": {
+      "childName": "esra",
+      "age": 5,
+      "gender": "kız",
+      "theme": "uzay",
+      "companion": "kopek",
+      "specialObject": "kilic",
+      "moral": "Paylaşmak"
+    },
+    "content": {
+      "title": "Esra ve Pofuduk'un Yıldızlı Paylaşım Macerası",
+      "segments": [
+        {
+          "order": 1,
+          "text": "Bir varmış, bir yokmuş, uzaklarda, ama aslında çok yakınlarda, yıldızları çok seven minik bir kız yaşarmış. Adı Esra’ymış. Esra’nın en sevdiği şeyi ne biliyor musunuz? Penceresinden gökyüzüne bakıp parıldayan yıldızları saymak! Esra’nın bir de sihirli bir eşyası vardı: Rengârenk bir sırt çantası. Bu çanta hiç sıradan değildi. Üzerindeki yıldızlar pırıl pırıl parlar, Esra “Tık tık tık” diye dokunduğunda sanki başka bir dünyaya açılırmış gibi olurdu. Esra, sırt çantasının uzaya açılan bir kapı olduğunu hissederdi.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90932a/7I9JTIJKFZ_BMuAaQIIAm.jpg"
+        },
+        {
+          "order": 2,
+          "text": "Bir akşam Esra, o minik kalbiyle yine uzay hayalleri kurarken, sihirli sırt çantasından hafif bir pırıltı geldiğini gördü. \"Acaba şimdi mi uzaya gitme zamanı?\" diye düşündü. Hemen en yakın arkadaşı, tüyleri pamuk gibi bembeyaz köpeği Pofuduk'u çağırdı. \"Pofuduk, Pofuduk, haydi gel! Uzay bizi çağırıyor!\" Pofuduk kuyruğunu şapır şupur sallayarak, \"Hav hav hav!\" diye Esra'nın yanına koştu. Esra güldü, sırt çantasını açtı. Çantanın içinden rengârenk, pırıl pırıl bir yol uzadı. \"Haydi Pofuduk, atla!\" Esra ve Pofuduk, \"Zuuuuuum!\" diye çantanın içine hopladılar ve kendilerini bir anda rengârenk yıldızların arasında buldular! Ne kadar da güzeldi! \"Bak Pofuduk, ne kadar çok yıldız var!\" \"Hav hav!\"",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90932a/TZBHykCDAiW4hb0yBFEUQ.jpg"
+        },
+        {
+          "order": 3,
+          "text": "Uzayda süzülürken, Esra ve Pofuduk ne görse beğenirsiniz? Kocaman, mor renkli, sanki binlerce minik yıldızla süslenmiş pırıl pırıl bir uzay meyvesi! \"Aaa, ne güzel!\" dedi Esra, gözleri parlayarak. Pofuduk da \"Hım hım, vak vak!\" diye heyecanla kuyruğunu sallıyordu. Esra o kadar heyecanlanmıştı ki, hemen uzay meyvesine uzandı ve hepsini tek başına yemek istedi. Tam ağzına götürecekken, Pofuduk'a baktı. Pofuduk'un minik gözleri meyvede kalmıştı, biraz da üzgün gibi görünüyordu. Esra düşündü: \"Pofuduk da bu güzel meyveyi çok istiyor olmalı. Eğer paylaşmazsam, o üzülecek.\" Esra'nın kalbi \"tık tık tık\" attı. Sonra gülümsedi. Meyveyi nazikçe ikiye ayırdı. Bir yarısını Pofuduk'a uzattı, \"Buyur canım arkadaşım, paylaşmak ne güzel!\" Pofuduk sevinçle \"Hav hav!\" dedi ve ikisi de \"Şapır şupur!\" diye uzay meyvelerini afiyetle yediler. Mmm, ne kadar lezzetliydi!",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90932a/Iyj6opTE3DkPVeyrUDdi3.jpg"
+        },
+        {
+          "order": 4,
+          "text": "Uzay meyvesini paylaşmak, ikisini de çok mutlu etmişti. Esra, \"Pofuduk,\" dedi, \"paylaşınca her şey daha güzel oluyor, değil mi?\" Pofuduk da onu onaylarcasına \"Hav hav!\" dedi ve Esra'nın yanağını yalamaya başladı. Maceranın sonuna gelmişlerdi. Esra, sihirli sırt çantasına \"Tak tak tak\" diye dokundu. Rengârenk yol yine belirdi ve \"Vızzzzt!\" diye bir sesle Esra ve Pofuduk kendilerini yumuşacık yataklarında buldular. Esra, Pofuduk'a kocaman sarıldı. \"Paylaşmak, arkadaşlığı daha da güzelleştirirmiş!\" diye fısıldadı. O gece, Esra ve Pofuduk, yıldızlara bakarak, kalpleri paylaşmanın sıcaklığıyla dolu, huzurla uykuya daldılar.",
+          "imageUrl": "https://v3b.fal.media/files/b/0a90932a/fNlW0CI70ukEQCO6NpohU.jpg"
+        }
+      ]
+    },
+    "userId": "LYVbVmaOxuRrWSaj0XRDDvBNplX2",
+    "isPremade": false,
+    "metadata": {
+      "isFavorite": false,
+      "readCount": 0
+    },
+    "savedAt": {
+      "_seconds": 1772470187,
+      "_nanoseconds": 152000000
+    }
+  }
+]

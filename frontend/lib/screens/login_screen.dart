@@ -193,8 +193,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 4),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: AppColors.authInputBorderError.withAlpha(20),
                     borderRadius: BorderRadius.circular(10),
@@ -235,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               strokeWidth: 2.5,
                               color: AppColors.authPrimaryButtonText),
                         )
-                      : const Text('Giriş Yap 🪄',
+                      : const Text('Giriş Yap',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
@@ -280,8 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: AppColors.authInputText))
+                              strokeWidth: 2.5, color: AppColors.authInputText))
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -305,8 +304,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('Kayıtlı değil misin?',
-                      style:
-                          TextStyle(fontSize: 14, color: Colors.grey[500])),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[500])),
                   TextButton(
                     onPressed: () => context.push('/register'),
                     style: TextButton.styleFrom(
