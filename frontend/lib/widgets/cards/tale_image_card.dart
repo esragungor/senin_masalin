@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 /// Görseli ve sağ alt köşesinde "Page X" etiketini içerir.
 class TaleImageCard extends StatelessWidget {
   final String imageUrl;
+  final VoidCallback? onTap;
 
   const TaleImageCard({
     super.key,
     required this.imageUrl,
+    this.onTap,
   });
 
   @override
@@ -28,13 +30,15 @@ class TaleImageCard extends StatelessWidget {
       ),
       // Resmin kenarlarında azıcık pay (beyaz çerçeve) efekti yaratmak için padding
       padding: const EdgeInsets.all(8),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // ── Görsel ──────────────────────────────────────────
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: imageUrl.startsWith('http')
+      child: GestureDetector(
+        onTap: onTap,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // ── Görsel ──────────────────────────────────────────
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: imageUrl.startsWith('http')
                 ? Image.network(
                     imageUrl,
                     fit: BoxFit.cover,
@@ -69,9 +73,9 @@ class TaleImageCard extends StatelessWidget {
                       ),
                     ),
                   ),
-          ),
-
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
