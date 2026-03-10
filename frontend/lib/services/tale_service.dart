@@ -4,11 +4,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 class TaleService {
-  // Fiziksel cihaz için: flutter run (varsayılan IP kullanılır)
-  // Emütatör için: flutter run --dart-define=BASE_URL=http://10.0.2.2:5000/api
+  // ─── Backend URL Ayarı ──────────────────────────────────────────
+  // 📱 Fiziksel cihaz (aynı WiFi):   http://192.168.0.136:3000/api
+  // 🖥️  Android Emülatör:            http://10.0.2.2:3000/api
+  //
+  // Çalıştırırken override etmek için:
+  //   flutter run --dart-define=BASE_URL=http://192.168.0.136:3000/api
+  // ────────────────────────────────────────────────────────────────
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
+<<<<<<< HEAD
     defaultValue: 'http://192.168.1.179:5000/api',
+=======
+    defaultValue: 'http://10.0.2.2:3000/api', // Emülatör varsayılan
+>>>>>>> 202006f2fc7a49d4ccd1e514c6e0b60a3b849a5a
   );
 
   static Future<Map<String, dynamic>> generateTale({

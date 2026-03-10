@@ -6,11 +6,17 @@ import '../screens/ready_tale_detail_screen.dart';
 class ReadyTaleCard extends StatelessWidget {
   final ReadyTale tale;
   final double width;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
+  final VoidCallback? onTapOverride;
 
   const ReadyTaleCard({
     super.key,
     required this.tale,
     this.width = 170, // Default for Sihirli Masallarım
+    this.isFavorite = false,
+    this.onFavoriteToggle,
+    this.onTapOverride,
   });
 
   @override
@@ -19,26 +25,13 @@ class ReadyTaleCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        // Karta tıklandığında direkt masala git
-        // Ham segmentleri ({{PROTAGONIST}} içeren) ve varsayılan ismi ilet
-        final storyData = {
-          'id': tale.id,
-          'title': displayTitle,
-          'isSavedTale': true,
-          'isReadyTale': true,
-          'protagonistName': tale.defaultProtagonist,
-          // Raw segmentler — TaleScreen içinde isim değiştirme için
-          'rawSegments': tale.segments
-              .map((s) => {'text': s.text, 'imageUrl': s.imageAsset})
-              .toList(),
-          'segments': tale.segments
-              .map((s) => {
-                    'text': s.text.replaceAll('{{PROTAGONIST}}', tale.defaultProtagonist),
-                    'imageUrl': s.imageAsset,
-                  })
-              .toList(),
-        };
-        context.push('/tale', extra: storyData);
+        if (onTapOverride != null) {
+          onTapOverride!();
+        } else {
+          // TaleScreen'e yönlendirmede toStoryData fonksiyonundan tam yararlan
+          final storyData = tale.toStoryData();
+          context.push('/tale', extra: storyData);
+        }
       },
       child: SizedBox(
         width: width,
@@ -48,31 +41,61 @@ class ReadyTaleCard extends StatelessWidget {
             // ── Kapak görseli ────────────────────────────
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: width,
-                height: width, // Kare yapmak için
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF9947EB), Color(0xFF6B2DBF)],
-                  ),
-                ),
-                child: tale.coverAsset != null
-                    ? Image.asset(
-                        tale.coverAsset!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
-                          Icons.book,
-                          color: Colors.white54,
-                          size: 50,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.auto_stories,
-                        color: Colors.white54,
-                        size: 50,
+              child: Stack(
+                children: [
+                  Container(
+                    width: width,
+                    height: width, // Kare yapmak için
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF9947EB), Color(0xFF6B2DBF)],
                       ),
+                    ),
+                    child: tale.coverAsset != null
+                        ? Image.asset(
+                            tale.coverAsset!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.book,
+                              color: Colors.white54,
+                              size: 50,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.auto_stories,
+                            color: Colors.white54,
+                            size: 50,
+                          ),
+                  ),
+                  
+                  // Favori ikonu sol üst (her zaman görünür veya toggle varsa)
+                  if (onFavoriteToggle != null)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: GestureDetector(
+                        onTap: onFavoriteToggle,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(240),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFavorite
+                                ? Icons.favorite_rounded
+                                : Icons.favorite_outline_rounded,
+                            color: isFavorite
+                                ? Colors.redAccent
+                                : const Color(0xFF8A94A6),
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
 
@@ -85,7 +108,7 @@ class ReadyTaleCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1A1A2E),
               ),
-              maxLines: 1,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
 

@@ -9,6 +9,7 @@ import '../../screens/create_tale_step2_screen.dart';
 import '../../screens/tale_generating_screen.dart';
 import '../../screens/tale_screen.dart';
 import '../../screens/tale_completed_screen.dart';
+import '../../screens/profile_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -78,6 +79,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             },
           ),
         ],
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
     ],
   );
