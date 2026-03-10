@@ -48,13 +48,24 @@ class ReadyTale {
   }
 
   /// TaleScreen'in beklediği Map formatına çevirir
-  Map<String, dynamic> toStoryData() {
+  /// [appliedName] verilirse o isimle, verilmezse [defaultProtagonist] ile formatlar.
+  Map<String, dynamic> toStoryData({String? appliedName}) {
+    final effectiveName = (appliedName?.trim().isNotEmpty == true) ? appliedName!.trim() : defaultProtagonist;
+    final formattedTitle = title.replaceAll('{{PROTAGONIST}}', effectiveName);
+    final effectiveId = id.startsWith('ready_') ? id : 'ready_$id';
+    
     return {
-      'id': id,
-      'title': title,
-      'isSavedTale': true,      // Çıkışta kaydetme sorusu çıkmasın
-      'isReadyTale': true,      // Hazır masal olduğunu işaretle
-      'segments': segments.map((s) => s.toMap()).toList(),
+      'id': effectiveId,
+      'storyId': effectiveId,
+      'title': formattedTitle,
+      'category': category,
+      'isSavedTale': true,
+      'isReadyTale': true,
+      'coverUrl': coverAsset,
+      'segments': segments.map((s) => s.applyProtagonist(effectiveName).toMap()).toList(),
+      // İleride seslendirirken veya ekran güncellerken kullanılabilecek metadatalar
+      'protagonistName': effectiveName,
+      'rawSegments': segments.map((s) => s.toMap()).toList(),
     };
   }
 }

@@ -4,8 +4,8 @@ import 'dart:async';
 import '../widgets/appbar/tale_appbar.dart';
 import '../widgets/appbar/tale_bottom_nav.dart';
 import '../widgets/cards/tale_image_card.dart';
-
 import '../services/tts_service.dart';
+import '../services/achievement_service.dart';
 
 /// Oluşturulan masalın okunduğu ekran.
 class TaleScreen extends StatefulWidget {
@@ -63,6 +63,20 @@ class _TaleScreenState extends State<TaleScreen> {
     _ttsService.addListener(() {
       if (mounted) setState(() {});
     });
+
+    // Eğer masal tek sayfalık ise (veya hatalı gelmişse) direkt okundu say
+    if (_pages.length <= 1) {
+      _markAsRead();
+    }
+  }
+
+  void _markAsRead() {
+    final storyId = widget.storyData['storyId'] as String? 
+                 ?? widget.storyData['id'] as String?
+                 ?? widget.storyData['title'] as String?
+                 ?? 'unsaved_tale_${widget.storyData.hashCode}';
+                 
+    AchievementService.markTaleAsRead(storyId);
   }
 
   @override
@@ -159,6 +173,11 @@ class _TaleScreenState extends State<TaleScreen> {
   void _onPageChanged(int index) {
     // Manuel veya otomatik sayfa değişiminde mevcut index'i güncelle
     setState(() => _currentPage = index);
+
+    // Kullanıcı son sayfaya geldiğinde okuma olarak say (masaldan erken çıksa bile)
+    if (index >= _pages.length - 1) {
+      _markAsRead();
+    }
   }
 
   Future<bool> _showExitConfirmation() async {
@@ -320,6 +339,11 @@ class _TalePage extends StatelessWidget {
           // ── Görsel Kartı ──────────────────────────────
           TaleImageCard(
             imageUrl: imageUrl,
+            onTap: () {
+              if (imageUrl.isNotEmpty) {
+                _showImageFullScreen(context, imageUrl);
+              }
+            },
           ),
 
           const SizedBox(height: 24),
@@ -353,4 +377,77 @@ class _TalePage extends StatelessWidget {
       ),
     );
   }
+
+  void _showImageFullScreen(BuildContext context, String imgUrl) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withAlpha(200),
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(10), // Ekrana biraz daha yayılsın
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Görsel
+              InteractiveViewer(
+                panEnabled: true,
+                minScale: 1.0,
+                maxScale: 4.0,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: imgUrl.startsWith('http')
+                      ? Image.network(
+                          imgUrl,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF9947EB),
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+                          errorBuilder: (_, __, ___) => Container(
+                            color: const Color(0xFFEEEDFC),
+                            child: const Center(
+                              child: Icon(Icons.image_not_supported_rounded, color: Color(0xFFB0BAC9), size: 48),
+                            ),
+                          ),
+                        )
+                      : Image.asset(
+                          imgUrl,
+                          fit: BoxFit.contain,
+                        ),
+                ),
+              ),
+
+              // Kapatma butonu (Sağ üst)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  icon: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
+

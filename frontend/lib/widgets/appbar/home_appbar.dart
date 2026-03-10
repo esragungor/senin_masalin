@@ -1,20 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../main.dart'; // sleepModeProvider
 
 /// Ana Sayfa AppBar'ı.
 /// Her sekme için farklı başlık gösterir.
-class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
+/// Riverpod ile gece/gündüz modunu güneş☀️/ay🌙 ikonu üzerinden toggle eder.
+class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final int currentIndex;
   const HomeAppBar({super.key, this.currentIndex = 0});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = FirebaseAuth.instance.currentUser;
     final displayName = user?.displayName ?? '';
     final firstName = displayName.split(' ').first;
     final greeting = firstName.isNotEmpty ? firstName : 'Kaşif';
-    final initial = greeting.isNotEmpty ? greeting[0].toUpperCase() : '?';
-    final photoUrl = user?.photoURL;
+    final isDark = ref.watch(sleepModeProvider);
 
     // Her sekme için başlık verisi
     final tabTitles = [
@@ -22,6 +24,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       {'top': 'Hazır Masal', 'bottom': 'Keşfet & Dinle 📚'},
       {'top': 'Masallarım', 'bottom': 'Sihirli Masallar ✨'},
       {'top': 'Favorilerim', 'bottom': 'En Sevdiklerin ❤️'},
+      {'top': 'Profilim', 'bottom': 'Hesabın & Ayarlar ⚙️'},
     ];
 
     final title = tabTitles[currentIndex.clamp(0, tabTitles.length - 1)];
@@ -61,49 +64,52 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: [
+        // ── Güneş / Ay toggle ────────────────────────────
         Padding(
-          padding: const EdgeInsets.only(right: 20, top: 24),
+          padding: const EdgeInsets.only(right: 16, top: 20),
           child: GestureDetector(
             onTap: () {
-              // TODO: Profil sayfasına git
+              ref.read(sleepModeProvider.notifier).state = !isDark;
             },
             child: Container(
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF308CE8).withAlpha(40),
+                color: isDark
+                    ? const Color(0xFF9947EB).withAlpha(20)
+                    : const Color(0xFFFFB300).withAlpha(20),
                 border: Border.all(
-                  color: const Color(0xFF308CE8).withAlpha(80),
+                  color: isDark
+                      ? const Color(0xFF9947EB).withAlpha(80)
+                      : const Color(0xFFFFB300).withAlpha(80),
                   width: 1.5,
                 ),
               ),
-              child: ClipOval(
-                child: photoUrl != null
-                    ? Image.network(
-                        photoUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _buildInitial(initial),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) => RotationTransition(
+                  turns: animation,
+                  child: FadeTransition(opacity: animation, child: child),
+                ),
+                child: isDark
+                    ? const Icon(
+                        Icons.nightlight_round,
+                        key: ValueKey('moon'),
+                        color: Color(0xFF9947EB),
+                        size: 24,
                       )
-                    : _buildInitial(initial),
+                    : const Icon(
+                        Icons.wb_sunny_rounded,
+                        key: ValueKey('sun'),
+                        color: Color(0xFFFFB300),
+                        size: 24,
+                      ),
               ),
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildInitial(String initial) {
-    return Center(
-      child: Text(
-        initial,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF308CE8),
-        ),
-      ),
     );
   }
 

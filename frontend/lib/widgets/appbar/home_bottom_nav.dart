@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 const _kActiveColor = Color(0xFF9947EB);
-const _kInactiveColor = Color(0xFFB0BAC9);
+const _kInactiveColor = Color(0xFF6B7280);
 
 /// Ana Sayfa alt navigasyon çubuğu.
 /// 5 sekme: Ana Sayfa, Hazır Masallar, Sihirli Masallar, Favoriler, Rozetlerim
@@ -31,7 +31,7 @@ class HomeBottomNav extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -60,8 +60,8 @@ class HomeBottomNav extends StatelessWidget {
                 onTap: () => onTap(3),
               ),
               _NavItem(
-                icon: Icons.emoji_events_rounded,
-                label: 'Rozetlerim',
+                icon: Icons.person_rounded,
+                label: 'Profilim',
                 isActive: currentIndex == 4,
                 onTap: () => onTap(4),
               ),
