@@ -12,7 +12,7 @@ import 'package:path_provider/path_provider.dart';
 class TTSService extends ChangeNotifier {
   static const String _baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'http://192.168.1.102:5000/api',
+    defaultValue: 'http://192.168.1.179:5000/api',
   );
 
   final AudioPlayer _player = AudioPlayer();

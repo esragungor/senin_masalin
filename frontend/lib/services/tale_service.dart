@@ -8,7 +8,7 @@ class TaleService {
   // Emütatör için: flutter run --dart-define=BASE_URL=http://10.0.2.2:5000/api
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'http://192.168.1.102:5000/api',
+    defaultValue: 'http://192.168.1.179:5000/api',
   );
 
   static Future<Map<String, dynamic>> generateTale({
