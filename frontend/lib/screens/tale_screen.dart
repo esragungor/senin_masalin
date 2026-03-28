@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
@@ -6,6 +7,9 @@ import '../widgets/appbar/tale_bottom_nav.dart';
 import '../widgets/cards/tale_image_card.dart';
 import '../services/tts_service.dart';
 import '../services/achievement_service.dart';
+import '../services/image_export_service.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:gal/gal.dart';
 
 /// Oluşturulan masalın okunduğu ekran.
 class TaleScreen extends StatefulWidget {
@@ -379,74 +383,138 @@ class _TalePage extends StatelessWidget {
   }
 
   void _showImageFullScreen(BuildContext context, String imgUrl) {
+    bool isColoringMode = false;
+    bool isSaving = false;
+    final screenshotController = ScreenshotController();
+
     showDialog(
       context: context,
-      barrierColor: Colors.black.withAlpha(200),
+      barrierColor: Colors.black.withAlpha(230),
       builder: (context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.all(10), // Ekrana biraz daha yayılsın
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Görsel
-              InteractiveViewer(
-                panEnabled: true,
-                minScale: 1.0,
-                maxScale: 4.0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: imgUrl.startsWith('http')
-                      ? Image.network(
-                          imgUrl,
-                          fit: BoxFit.contain,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF9947EB),
-                                strokeWidth: 2,
-                              ),
-                            );
-                          },
-                          errorBuilder: (_, __, ___) => Container(
-                            color: const Color(0xFFEEEDFC),
-                            child: const Center(
-                              child: Icon(Icons.image_not_supported_rounded, color: Color(0xFFB0BAC9), size: 48),
-                            ),
-                          ),
-                        )
-                      : Image.asset(
-                          imgUrl,
-                          fit: BoxFit.contain,
-                        ),
-                ),
-              ),
-
-              // Kapatma butonu (Sağ üst)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 24,
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(10),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // ── Görsel & Screenshot ───────────────────────
+                  InteractiveViewer(
+                    panEnabled: true,
+                    minScale: 1.0,
+                    maxScale: 4.0,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: imgUrl.startsWith('http')
+                          ? Image.network(
+                              imgUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => _errorPlaceholder(),
+                            )
+                          : Image.asset(imgUrl, fit: BoxFit.contain),
                     ),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
+
+                  // ── Üst Butonlar (Kapat, Boyama Modu, İndir) ──
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 10),
+                        const SizedBox(width: 10),
+                  // İndir Butonu (Tek Başına)
+                        _CircleButton(
+                          icon: isSaving ? Icons.hourglass_bottom : Icons.download_rounded,
+                          onPressed: isSaving 
+                            ? null 
+                            : () async {
+                                setDialogState(() => isSaving = true);
+                                try {
+                                  await ImageExportService.saveImage(
+                                    imageUrl: imgUrl,
+                                  );
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('✅ Görsel galeriye kaydedildi!'),
+                                        backgroundColor: Color(0xFF4CAF50),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('❌ Hata: $e')),
+                                    );
+                                  }
+                                } finally {
+                                  setDialogState(() => isSaving = false);
+                                }
+                              },
+                          tooltip: 'Galerime Kaydet',
+                        ),
+                        const SizedBox(width: 10),
+                        // Kapat
+                        _CircleButton(
+                          icon: Icons.close,
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
+    );
+  }
+
+  Widget _errorPlaceholder() => Container(
+        color: const Color(0xFFEEEDFC),
+        child: const Center(
+          child: Icon(Icons.image_not_supported_rounded, color: Color(0xFFB0BAC9), size: 48),
+        ),
+      );
+}
+
+class _CircleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final Color color;
+  final String? tooltip;
+
+  const _CircleButton({
+    required this.icon,
+    this.onPressed,
+    this.color = Colors.white,
+    this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip ?? '',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              shape: BoxShape.circle,
+              border: Border.all(color: color.withOpacity(0.5), width: 1),
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+        ),
+      ),
     );
   }
 }

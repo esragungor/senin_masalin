@@ -44,7 +44,10 @@ dependencies:
   intl: ^0.19.0
   shared_preferences: ^2.3.2
   uuid: ^4.4.2
-  path_provider: ^2.1.3
+  path_provider: ^2.1.5
+  gal: ^2.3.2
+  http: ^1.6.0
+  screenshot: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -59,5 +62,64 @@ flutter:
     - assets/images/
     - assets/animations/
     - assets/icons/
+    - assets/puzzles/
     - assets/ready_tales/kirmizi_baslikli_kiz/
     - assets/ready_tales/yalanci_coban/
+    - assets/ready_tales/pinokyo/
+    - assets/ready_tales/altin_sacli_kiz/
+    - assets/ready_tales/kucuk_kirmizi_tavuk/
+    - assets/ready_tales/kralin_gorunmez_kiyafetleri/
+    - assets/ready_tales/uyuyan_guzel/
+    - assets/ready_tales/uyku_perisi/
+    - assets/ready_tales/parmak_kiz/
+    - assets/ready_tales/kucuk_prens/
+    - assets/ready_tales/yildiz_cocuk/
+    - assets/ready_tales/neseli_papatya/
+    - assets/ready_tales/zencefilli_kurabiye/
+    - assets/ready_tales/dev_salgam/
+    - assets/ready_tales/saskin_hans/
+    - assets/ready_tales/sihirli_tencere/
+    - assets/ready_tales/uc_dilek/
+    - assets/ready_tales/keloglan_sihirli_tas/
+    - assets/ready_tales/bremen_mizikacilari/
+    - assets/ready_tales/boz_tuy_ordek/
+    - assets/ready_tales/karinca_agustos_bocegi/
+    - assets/ready_tales/uc_kucuk_domuzcuk/
+    - assets/ready_tales/tavsan_kaplumbaga/
+    - assets/ready_tales/aslan_fare/
+    - assets/ready_tales/kursun_asker/
+    - assets/ready_tales/peter_pan/
+    - assets/ready_tales/jack_fasulye/
+    - assets/ready_tales/cesur_terzi/
+    - assets/ready_tales/denizci_sindbad/
+    - assets/ready_tales/findikkiran/
+    - assets/ready_tales/belle_sato_gizemi/
+    - assets/ready_tales/kibritci_kiz/
+    - assets/ready_tales/neseli_prens/
+    - assets/ready_tales/pamuk_prenses/
+    - assets/ready_tales/kocaman_dev/
+    - assets/ready_tales/ayakkabici_elfler/
+    - assets/ready_tales/sindirella/
+    - assets/ready_tales/karlar_kralicesi/
+    - assets/ready_tales/kurbaga_prens/
+    - assets/ready_tales/alaaddin/
+    - assets/ready_tales/kugu_golu/
+    - assets/ready_tales/cizmeli_kedi/
+    - assets/ready_tales/pofuduk_bilmececi/
+    - assets/ready_tales/ali_baba_haramiler/
+    - assets/ready_tales/hansel_gretel/
+    - assets/ready_tales/keloglan_bilmece/
+    - assets/ready_tales/tilki_ile_leylek/
+    - assets/ready_tales/karga_gakgak_tilki/
+    - assets/ready_tales/alice_harikalar/
+    - assets/ready_tales/oz_buyucusu/
+    - assets/ready_tales/mowgli_orman_sarkisi/
+    - assets/ready_tales/heidi/
+    - assets/ready_tales/gulliver/
+    - assets/ready_tales/robin_hood/
+    - assets/ready_tales/rapunzel/
+    - assets/ready_tales/on_iki_dans_eden_prenses/
+    - assets/ready_tales/prenses_ve_bezelye_tanesi/
+    - assets/ready_tales/kucuk_deniz_kizi/
+    - assets/ready_tales/prenses_ve_akilli_kazlar/
+    - assets/ready_tales/eliza_ve_on_bir_gumus_kugu/

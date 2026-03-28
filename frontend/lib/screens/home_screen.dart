@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'profile_screen.dart';
 import '../widgets/appbar/home_appbar.dart';
 import '../widgets/appbar/home_bottom_nav.dart';
 import '../core/constants/mock_data.dart';
@@ -10,38 +10,84 @@ import '../features/ready_tales/ready_tales_registry.dart';
 import '../features/ready_tales/ready_tale_model.dart';
 import '../features/ready_tales/widgets/ready_tale_card.dart';
 import '../services/local_favorite_service.dart';
+import '../main.dart';
 
 /// Ana Sayfa
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   final int initialIndex;
   const HomeScreen({super.key, this.initialIndex = 0});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  late int _currentIndex;
-  late List<Map<String, dynamic>> _allTales;
-  late List<Map<String, dynamic>> _predefinedTales;
-  final Set<String> _favoriteIds = {};
-  bool _isLoading = false; // Ekranı hemen aç; masallar arka planda yüklenir
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  late int selectedIndex;
+  late List<Map<String, dynamic>> allTales;
+  final Set<String> favoriteIds = {};
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
-    _allTales = MockData.myTales;
-    // Hazır masalları Registry üzerinden storyData formatında yükle
-    _predefinedTales = ReadyTalesRegistry.allTales.map((t) => t.toStoryData()).toList();
+    selectedIndex = widget.initialIndex;
+    allTales = MockData.myTales;
     _loadMyTales();
+  }
+
+  // 5 sekme: Ana Sayfa, Hazır Masallar, Sihirli Masallar, Favoriler, Profilim
+  List<Widget> get _screens => [
+    _HomeDashboard(tales: allTales, favoriteIds: favoriteIds, isLoading: isLoading),
+    _PredefinedTalesTab(
+      favoriteIds: favoriteIds,
+      onFavoriteToggle: toggleFavorite,
+    ),
+    _AllTalesTab(
+      tales: allTales,
+      onDelete: _deleteTale,
+      favoriteIds: favoriteIds,
+      onFavoriteToggle: toggleFavorite,
+    ),
+    _FavoritesTab(
+      favoriteTales: _getFavoriteTales(),
+      onFavoriteToggle: toggleFavorite,
+    ),
+    const ProfileScreen(),
+  ];
+
+  List<Map<String, dynamic>> _getFavoriteTales() {
+    final List<Map<String, dynamic>> favorites = [];
+    
+    // Kullanıcı masallarından favorileri ekle
+    for (var tale in allTales) {
+      final id = tale['id'] as String? ?? tale['storyId'] as String?;
+      if (id != null && favoriteIds.contains(id)) {
+        favorites.add(tale);
+      }
+    }
+    
+    // Hazır masallardan favorileri ekle
+    for (var readyTale in ReadyTalesRegistry.allTales) {
+      final formattedId = readyTale.id.startsWith('ready_') ? readyTale.id : 'ready_${readyTale.id}';
+      if (favoriteIds.contains(formattedId)) {
+        favorites.add({
+          'id': formattedId,
+          'title': readyTale.title,
+          'coverUrl': readyTale.coverAsset,
+          'isReadyTale': true,
+          'readyTale': readyTale,
+        });
+      }
+    }
+    
+    return favorites;
   }
 
   @override
   void didUpdateWidget(covariant HomeScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialIndex != widget.initialIndex) {
-      setState(() => _currentIndex = widget.initialIndex);
+      setState(() => selectedIndex = widget.initialIndex);
       _loadMyTales();
     }
   }
@@ -58,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final localFavs = await LocalFavoriteService.getFavorites();
 
       if (mounted) {
-        // Backend'den gelen favorileri local set'e al
         final favIds = <String>{};
         for (final tale in tales) {
           final id = tale['id'] as String? ?? tale['storyId'] as String?;
@@ -67,38 +112,34 @@ class _HomeScreenState extends State<HomeScreen> {
             favIds.add(id);
           }
         }
-        
-        // Hazır masalların lokal favorilerini de ekle
         favIds.addAll(localFavs);
 
         setState(() {
-          _allTales = tales;
+          allTales = tales;
           MockData.myTales = tales;
-          _favoriteIds.clear(); // Set'i temizle, yoksa eski id'ler kalır
-          _favoriteIds.addAll(favIds);
-          _isLoading = false;
+          favoriteIds.clear();
+          favoriteIds.addAll(favIds);
+          isLoading = false;
         });
       }
     } catch (e) {
       debugPrint('Masallar yüklenemedi: $e');
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => isLoading = false);
       }
     }
   }
 
-  void _toggleFavorite(String id) async {
-    final newFav = !_favoriteIds.contains(id);
-    // UI'ı hemen güncelle
+  void toggleFavorite(String id) async {
+    final newFav = !favoriteIds.contains(id);
     setState(() {
       if (newFav) {
-        _favoriteIds.add(id);
+        favoriteIds.add(id);
       } else {
-        _favoriteIds.remove(id);
+        favoriteIds.remove(id);
       }
     });
     
-    // Backend VEYA Local Storage'a kaydet
     try {
       if (id.startsWith('ready_')) {
         await LocalFavoriteService.toggleFavorite(id);
@@ -106,13 +147,12 @@ class _HomeScreenState extends State<HomeScreen> {
         await TaleService.toggleFavorite(id, newFav);
       }
     } catch (e) {
-      // Hata olursa geri al
       if (mounted) {
         setState(() {
           if (newFav) {
-            _favoriteIds.remove(id);
+            favoriteIds.remove(id);
           } else {
-            _favoriteIds.add(id);
+            favoriteIds.add(id);
           }
         });
       }
@@ -151,21 +191,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final taleId = _allTales[index]['id'];
+                final taleId = allTales[index]['id'];
                 Navigator.of(context).pop();
 
                 try {
-                  // API'ye silme isteği at
                   await TaleService.deleteTale(taleId);
                   
-                  // Başarılı olursa UI'dan kaldır
                   if (mounted) {
                     setState(() {
-                      _allTales.removeAt(index);
+                      allTales.removeAt(index);
                     });
                   }
                 } catch (e) {
-                  // Silme başarısız olursa kullanıcıya hata göster
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Silinirken hata oluştu: $e')),
@@ -190,69 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF9947EB),
-        ),
-      );
-    }
-
-    if (_currentIndex == 1) {
-      return _PredefinedTalesTab(
-        favoriteIds: _favoriteIds,
-        onFavoriteToggle: _toggleFavorite,
-      );
-    }
-    if (_currentIndex == 2) {
-      return _AllTalesTab(
-        tales: _allTales,
-        favoriteIds: _favoriteIds,
-        onDelete: _deleteTale,
-        onFavoriteToggle: _toggleFavorite,
-      );
-    }
-    if (_currentIndex == 3) {
-      final allTales = [..._allTales, ..._predefinedTales];
-      final favoriteTales =
-          allTales.where((t) => _favoriteIds.contains(t['id'])).toList();
-      return _FavoritesTab(
-        favoriteTales: favoriteTales,
-        onFavoriteToggle: _toggleFavorite,
-      );
-    }
-
-    // Varsayılan Ana Sayfa (0)
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _MagicHeroCard(
-            onAction: () {
-              if (_allTales.length >= 10) {
-                _showLimitDialog();
-              } else {
-                context.push('/create');
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          _RecentTalesSection(
-            recentTales: _allTales.take(5).toList(),
-            favoriteIds: _favoriteIds,
-            onFavoriteToggle: _toggleFavorite,
-            onSeeAll: () {
-              setState(() => _currentIndex = 2);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLimitDialog() {
+  void showLimitDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -281,22 +256,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F6F8),
-      appBar: HomeAppBar(currentIndex: _currentIndex),
+      appBar: selectedIndex == 4 ? null : HomeAppBar(currentIndex: selectedIndex),
       bottomNavigationBar: HomeBottomNav(
-        currentIndex: _currentIndex,
+        currentIndex: selectedIndex,
         onTap: (index) {
-          if (index == 4) {
-            context.push('/profile');
-          } else {
-            setState(() => _currentIndex = index);
-          }
+          setState(() => selectedIndex = index);
         },
       ),
-      floatingActionButton: _currentIndex == 2
+      floatingActionButton: selectedIndex == 0 || selectedIndex == 2
           ? FloatingActionButton(
               onPressed: () {
-                if (_allTales.length >= 10) {
-                  _showLimitDialog();
+                if (allTales.length >= 10) {
+                  showLimitDialog();
                 } else {
                   context.push('/create');
                 }
@@ -305,7 +276,63 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
             )
           : null,
-      body: _buildBody(),
+      body: IndexedStack(
+        index: selectedIndex,
+        children: _screens,
+      ),
+    );
+  }
+}
+
+class _HomeDashboard extends ConsumerWidget {
+  final List<Map<String, dynamic>> tales;
+  final Set<String> favoriteIds;
+  final bool isLoading;
+
+  const _HomeDashboard({
+    required this.tales,
+    required this.favoriteIds,
+    required this.isLoading,
+  });
+  
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator(color: Color(0xFF9947EB)));
+    }
+
+    final state = context.findAncestorStateOfType<_HomeScreenState>();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _MagicHeroCard(
+            onAction: () {
+              if (tales.length >= 10) {
+                state?.showLimitDialog();
+              } else {
+                context.push('/create');
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+          if (tales.isNotEmpty) ...[
+            _RecentTalesSection(
+              recentTales: tales.take(4).toList(),
+              favoriteIds: favoriteIds,
+              onFavoriteToggle: (id) => state?.toggleFavorite(id),
+              onSeeAll: () {
+                state?.setState(() => state.selectedIndex = 2);
+              },
+            ),
+          ] else ...[
+            const SizedBox(height: 24),
+            _EmptyTalesState(),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -314,7 +341,6 @@ class _HomeScreenState extends State<HomeScreen> {
 // HERO KART
 // ────────────────────────────────────────────────────────────────────────────
 
-/// AppBar altındaki "Sihirli Bir Macera Başlat" kartı.
 class _MagicHeroCard extends StatelessWidget {
   final VoidCallback onAction;
 
@@ -338,7 +364,6 @@ class _MagicHeroCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Mor daire + sihirli değnek ikonu ──────────
           Container(
             width: 52,
             height: 52,
@@ -352,36 +377,27 @@ class _MagicHeroCard extends StatelessWidget {
               size: 26,
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // ── Başlık ────────────────────────────────────
           const Text(
             'Sihirli Bir Macera Başlat',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1A1A2E),
             ),
           ),
-
           const SizedBox(height: 6),
-
-          // ── Alt yazı ──────────────────────────────────
           const Text(
             'Hayalindeki karakterleri seç\nve kendi masalını hemen oluştur!',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               color: Color(0xFF8A94A6),
               height: 1.4,
             ),
           ),
-
           const SizedBox(height: 14),
-
-          // ── Yeni Masal Oluştur Butonu ─────────────────
           SizedBox(
             width: double.infinity,
             height: 44,
@@ -412,11 +428,6 @@ class _MagicHeroCard extends StatelessWidget {
   }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// SON MASALLARIM BÖLÜMÜ
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Sihirli masallar bölümü — önizleme için örnek veriler.
 class _RecentTalesSection extends StatelessWidget {
   final VoidCallback onSeeAll;
   final List<Map<String, dynamic>> recentTales;
@@ -435,7 +446,6 @@ class _RecentTalesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Başlık satırı ─────────────────────────────
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -464,9 +474,7 @@ class _RecentTalesSection extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 14),
-
         SizedBox(
           height: 235,
           child: ListView.separated(
@@ -489,7 +497,6 @@ class _RecentTalesSection extends StatelessWidget {
   }
 }
 
-/// Hiç masal yokken boş durum.
 class _EmptyTalesState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -524,7 +531,6 @@ class _EmptyTalesState extends StatelessWidget {
   }
 }
 
-/// Tek bir masal kartı.
 class _TaleCard extends StatelessWidget {
   final Map<String, dynamic> data;
   final bool showDelete;
@@ -539,7 +545,7 @@ class _TaleCard extends StatelessWidget {
     this.onDelete,
     this.isFavorite = false,
     this.onFavoriteToggle,
-    this.width = 170, // Default for Sihirli Masallarım
+    this.width = 170,
   });
 
   @override
@@ -547,7 +553,10 @@ class _TaleCard extends StatelessWidget {
     String title = 'İsimsiz Masal';
     String? coverUrl;
 
-    if (data['content'] != null) {
+    if (data['isReadyTale'] == true) {
+      title = data['title'];
+      coverUrl = data['coverUrl'];
+    } else if (data['content'] != null) {
       title = data['content']['title'] ?? title;
       final segments = data['content']['segments'];
       if (segments != null && segments is List && segments.isNotEmpty) {
@@ -556,17 +565,15 @@ class _TaleCard extends StatelessWidget {
     } else {
       title = data['title'] ?? title;
       coverUrl = data['coverUrl'];
-      if (coverUrl == null && data['segments'] != null && data['segments'].isNotEmpty) {
+      if (coverUrl == null && data['segments'] != null && data['segments'] is List && data['segments'].isNotEmpty) {
         coverUrl = data['segments'][0]['imageUrl'];
       }
     }
 
-    // Örnek veri string, Firestore verisi Timestamp olabilir
     String timeAgo = data['timeAgo'] as String? ?? '';
-    if (timeAgo.isEmpty) {
+    if (timeAgo.isEmpty && data['isReadyTale'] != true) {
       final createdAt = data['savedAt'] ?? data['createdAt'];
       if (createdAt != null) {
-        // If it's a Map like {_seconds: ..., _nanoseconds: ...} (which is how Firestore timestamps look when serialized via JSON)
         if (createdAt is Map<String, dynamic> && createdAt.containsKey('_seconds')) {
           final seconds = createdAt['_seconds'] as int;
           final date = DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
@@ -592,151 +599,225 @@ class _TaleCard extends StatelessWidget {
            }
         }
       }
-    }
-
-    // Backend'den gelen veriyi TaleScreen'in beklediği formata çevir
-    Map<String, dynamic> storyDataForScreen;
-    if (data['content'] != null) {
-      final storyId = data['id'] ?? data['storyId'];
-      storyDataForScreen = {
-        'title': data['content']['title'],
-        'segments': data['content']['segments'],
-        if (storyId != null) 'storyId': storyId,
-        'isSavedTale': true, // Kaydedilmiş masaldan gelindiğini işaretle
-      };
-    } else {
-      storyDataForScreen = {...data, 'isSavedTale': true};
+    } else if (data['isReadyTale'] == true) {
+      timeAgo = (data['readyTale'] as ReadyTale).category;
     }
 
     return GestureDetector(
-      onTap: () => context.push('/tale', extra: storyDataForScreen),
+      onTap: () {
+        if (data['isReadyTale'] == true) {
+          context.push('/ready_tale_detail', extra: data['readyTale']);
+        } else {
+          Map<String, dynamic> storyDataForScreen;
+          if (data['content'] != null) {
+            final storyId = data['id'] ?? data['storyId'];
+            storyDataForScreen = {
+              'title': data['content']['title'],
+              'segments': data['content']['segments'],
+              if (storyId != null) 'storyId': storyId,
+              'isSavedTale': true,
+            };
+          } else {
+            storyDataForScreen = {...data, 'isSavedTale': true};
+          }
+          context.push('/tale', extra: storyDataForScreen);
+        }
+      },
       child: SizedBox(
-      width: width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Kapak görseli ────────────────────────────
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Stack(
-              children: [
-                Container(
-                  width: width,
-                  height: width, // Kare yapmak için
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF9947EB), Color(0xFF6B2DBF)],
-                    ),
-                  ),
-                  child: coverUrl != null
-                      ? (coverUrl.startsWith('http')
-                          ? Image.network(
-                              coverUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.book,
-                                color: Colors.white54,
-                                size: 50,
-                              ),
-                            )
-                          : Image.asset(
-                              coverUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.book,
-                                color: Colors.white54,
-                                size: 50,
-                              ),
-                            ))
-                      : const Icon(
-                          Icons.auto_stories,
-                          color: Colors.white54,
-                          size: 50,
-                        ),
-                ),
-                // Favori ikonu sol üst (her zaman)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: GestureDetector(
-                    onTap: onFavoriteToggle,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withAlpha(240),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isFavorite
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_outline_rounded,
-                        color: isFavorite
-                            ? Colors.redAccent
-                            : const Color(0xFF8A94A6),
-                        size: 18,
+        width: width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Stack(
+                children: [
+                  Container(
+                    width: width,
+                    height: width,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF9947EB), Color(0xFF6B2DBF)],
                       ),
                     ),
+                    child: coverUrl != null
+                        ? (coverUrl.startsWith('http')
+                            ? Image.network(
+                                coverUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.book,
+                                  color: Colors.white54,
+                                  size: 50,
+                                ),
+                              )
+                            : Image.asset(
+                                coverUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.book,
+                                  color: Colors.white54,
+                                  size: 50,
+                                ),
+                              ))
+                        : const Icon(
+                            Icons.auto_stories,
+                            color: Colors.white54,
+                            size: 50,
+                          ),
                   ),
-                ),
-
-                // Sil ikonu sağ üst
-                if (showDelete)
                   Positioned(
                     top: 8,
-                    right: 8,
+                    left: 8,
                     child: GestureDetector(
-                      onTap: onDelete,
+                      onTap: onFavoriteToggle,
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: Colors.white.withAlpha(240),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.delete_outline_rounded,
-                          color: Colors.redAccent,
+                        child: Icon(
+                          isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_outline_rounded,
+                          color: isFavorite
+                              ? Colors.redAccent
+                              : const Color(0xFF8A94A6),
                           size: 18,
                         ),
                       ),
                     ),
                   ),
-              ],
+                  if (showDelete)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: onDelete,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(240),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.delete_outline_rounded,
+                            color: Colors.redAccent,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A1A2E),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          const SizedBox(height: 2),
-
-          Text(
-            timeAgo,
-            style: const TextStyle(fontSize: 11, color: Color(0xFF8A94A6)),
-          ),
-        ],
-      ),
+            const SizedBox(height: 2),
+            Text(
+              timeAgo,
+              style: const TextStyle(fontSize: 11, color: Color(0xFF8A94A6)),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// TÜM MASALLAR SEKMSİ
+// HAZIR MASALLAR SEKMESİ
 // ────────────────────────────────────────────────────────────────────────────
 
-/// Alt gezinme çubuğunda "Sihirli Masallar" seçildiğinde gösterilen sayfa.
+class _PredefinedTalesTab extends StatelessWidget {
+  final Set<String> favoriteIds;
+  final Function(String) onFavoriteToggle;
+
+  const _PredefinedTalesTab({
+    required this.favoriteIds,
+    required this.onFavoriteToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (ReadyTalesRegistry.allTales.isEmpty) {
+      return const Center(child: Text('Hazır masal bulunamadı.'));
+    }
+
+    final groupedTales = ReadyTalesRegistry.getGroupedTales();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth - 40 - 16) / 2;
+        
+        return ListView.separated(
+          padding: const EdgeInsets.only(top: 12, bottom: 100),
+          itemCount: groupedTales.keys.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final category = groupedTales.keys.elementAt(index);
+            final talesInCategory = groupedTales[category]!;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    category,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A1A2E),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: cardWidth + 50,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: talesInCategory.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 16),
+                    itemBuilder: (context, i) {
+                      final tale = talesInCategory[i];
+                      final formattedId = tale.id.startsWith('ready_') ? tale.id : 'ready_${tale.id}';
+                      
+                      return ReadyTaleCard(
+                        tale: tale,
+                        width: cardWidth,
+                        isFavorite: favoriteIds.contains(formattedId),
+                        onFavoriteToggle: () => onFavoriteToggle(formattedId),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// SİHİRLİ MASALLAR (Kullanıcı Masalları) SEKMESİ
+// ────────────────────────────────────────────────────────────────────────────
+
 class _AllTalesTab extends StatelessWidget {
   final List<Map<String, dynamic>> tales;
   final Function(int) onDelete;
@@ -761,7 +842,7 @@ class _AllTalesTab extends StatelessWidget {
       );
     }
 
-    final int maxTales = 10;
+    const int maxTales = 10;
     final int remaining = (maxTales - tales.length).clamp(0, maxTales);
     final bool isFull = remaining == 0;
 
@@ -773,14 +854,10 @@ class _AllTalesTab extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isFull
-                    ? const Color(0xFFFFEDED)
-                    : const Color(0xFFEEEDFC),
+                color: isFull ? const Color(0xFFFFEDED) : const Color(0xFFEEEDFC),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isFull
-                      ? Colors.redAccent.withAlpha(80)
-                      : const Color(0xFF9947EB).withAlpha(60),
+                  color: isFull ? Colors.redAccent.withAlpha(80) : const Color(0xFF9947EB).withAlpha(60),
                   width: 1,
                 ),
               ),
@@ -796,22 +873,16 @@ class _AllTalesTab extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isFull
-                              ? 'Masal limitine ulaştın!'
-                              : 'Sihirli Masal Hakkın',
+                          isFull ? 'Masal limitine ulaştın!' : 'Sihirli Masal Hakkın',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            color: isFull
-                                ? Colors.redAccent
-                                : const Color(0xFF9947EB),
+                            color: isFull ? Colors.redAccent : const Color(0xFF9947EB),
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          isFull
-                              ? 'Yeni masal oluşturmak için mevcut masallarını silebilirsin.'
-                              : 'Kalan Hak: $remaining / $maxTales',
+                          isFull ? 'Yeni masal oluşturmak için mevcut masallarını silebilirsin.' : 'Kalan Hak: $remaining / $maxTales',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF6B7280),
@@ -820,180 +891,37 @@ class _AllTalesTab extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 42,
-                        height: 42,
-                        child: CircularProgressIndicator(
-                          value: remaining / maxTales,
-                          strokeWidth: 4,
-                          backgroundColor: const Color(0xFFE2E8F0),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            isFull ? Colors.redAccent : const Color(0xFF9947EB),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '$remaining',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: isFull
-                              ? Colors.redAccent
-                              : const Color(0xFF9947EB),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 100),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final cardWidth = (constraints.maxWidth - 16) / 2;
-                return Wrap(
-                  spacing: 16,
-                  runSpacing: 16,
-                  crossAxisAlignment: WrapCrossAlignment.start,
-                  children: tales.asMap().entries.map((entry) {
-                    final i = entry.key;
-                    final tale = entry.value;
-                    return _TaleCard(
-                      data: tale,
-                      width: cardWidth,
-                      showDelete: true,
-                      onDelete: () => onDelete(i),
-                      isFavorite: favoriteIds.contains(tale['id']),
-                      onFavoriteToggle: () => onFavoriteToggle(tale['id']),
-                    );
-                  }).toList(),
+        SliverPadding(
+          padding: const EdgeInsets.all(20),
+          sliver: SliverGrid(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.68,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final tale = tales[index];
+                return _TaleCard(
+                  data: tale,
+                  showDelete: true,
+                  onDelete: () => onDelete(index),
+                  isFavorite: favoriteIds.contains(tale['id']),
+                  onFavoriteToggle: () => onFavoriteToggle(tale['id']),
                 );
               },
+              childCount: tales.length,
             ),
           ),
         ),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
       ],
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// HAZIR MASALLAR SEKMESİ
-// ────────────────────────────────────────────────────────────────────────────
-
-/// Alt gezinme çubuğunda "Hazır Masallar" seçildiğinde gösterilen sayfa (Index 1).
-class _PredefinedTalesTab extends StatelessWidget {
-  final Set<String> favoriteIds;
-  final Function(String) onFavoriteToggle;
-
-  const _PredefinedTalesTab({
-    required this.favoriteIds,
-    required this.onFavoriteToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (ReadyTalesRegistry.allTales.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.auto_stories, size: 64, color: Color(0xFFD1D5DB)),
-              SizedBox(height: 16),
-              Text(
-                'Hazır masal bulunamadı.',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Kategorilere göre grupla
-    final Map<String, List<ReadyTale>> groupedTales = {};
-    for (final tale in ReadyTalesRegistry.allTales) {
-      if (!groupedTales.containsKey(tale.category)) {
-        groupedTales[tale.category] = [];
-      }
-      groupedTales[tale.category]!.add(tale);
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.only(top: 16, bottom: 100),
-      itemCount: groupedTales.keys.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 20),
-      itemBuilder: (context, index) {
-        final category = groupedTales.keys.elementAt(index);
-        final talesInCategory = groupedTales[category]!;
-
-        // Kategorideki en uzun masal ismini tahmini satır sayısına göre bul
-        // Daha güvenli yükseklik değerleri (Taşmayı önlemek için)
-        double maxCategoryHeight = 190; // min height (1 satır)
-        for (var t in talesInCategory) {
-          final displayTitle = t.title.replaceAll('{{PROTAGONIST}}', t.defaultProtagonist);
-          // 150px genişliğinde tahminen 15-18 karakter 1 satır eder
-          if (displayTitle.length > 35) {
-             maxCategoryHeight = 230; // 3 satır
-             break; // En yüksek bulundu, döngüden çık
-          } else if (displayTitle.length > 16) {
-             maxCategoryHeight = 210; // 2 satır
-          }
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                category,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: maxCategoryHeight,
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                scrollDirection: Axis.horizontal,
-                itemCount: talesInCategory.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
-                itemBuilder: (context, i) {
-                  final tale = talesInCategory[i];
-                  // ID karşılaştırmasını local service prefix ile uyumlu yapıyoruz
-                  final formattedId = tale.id.startsWith('ready_') ? tale.id : 'ready_${tale.id}';
-                  
-                  return ReadyTaleCard(
-                    tale: tale,
-                    width: 150,
-                    isFavorite: favoriteIds.contains(formattedId),
-                    onFavoriteToggle: () => onFavoriteToggle(formattedId),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
@@ -1002,7 +930,6 @@ class _PredefinedTalesTab extends StatelessWidget {
 // FAVORİLER SEKMESİ
 // ────────────────────────────────────────────────────────────────────────────
 
-/// Alt gezinme çubuğunda "Favoriler" seçildiğinde gösterilen sayfa (Index 3).
 class _FavoritesTab extends StatelessWidget {
   final List<Map<String, dynamic>> favoriteTales;
   final Function(String) onFavoriteToggle;
@@ -1021,8 +948,7 @@ class _FavoritesTab extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(Icons.favorite_border_rounded,
-                  size: 64, color: Color(0xFFD1D5DB)),
+              Text('❤️', style: TextStyle(fontSize: 64)),
               SizedBox(height: 16),
               Text(
                 'Henüz favori masalın yok',
@@ -1031,12 +957,6 @@ class _FavoritesTab extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1A1A2E),
                 ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Masalları favorilerine eklemek için kalp ikonuna tıkla.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFF8A94A6)),
               ),
             ],
           ),
@@ -1049,39 +969,8 @@ class _FavoritesTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Favori sayacı banner ──────────────────────
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEEDFC),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: const Color(0xFF9947EB).withAlpha(60),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('❤️', style: TextStyle(fontSize: 20)),
-                const SizedBox(width: 10),
-                Text(
-                  '${favoriteTales.length} Favori Masal',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF9947EB),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // ── Favori kartları ────────────────────────────
           LayoutBuilder(
             builder: (context, constraints) {
-              // Kart genişliği = (toplam genişlik - 1 boşluk) / 2
               final cardWidth = (constraints.maxWidth - 16) / 2;
               return Wrap(
                 spacing: 16,
@@ -1090,7 +979,6 @@ class _FavoritesTab extends StatelessWidget {
                   return _TaleCard(
                     data: tale,
                     width: cardWidth,
-                    showDelete: false,
                     isFavorite: true,
                     onFavoriteToggle: () => onFavoriteToggle(tale['id']),
                   );

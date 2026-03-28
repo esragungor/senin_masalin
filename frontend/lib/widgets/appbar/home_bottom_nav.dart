@@ -4,7 +4,7 @@ const _kActiveColor = Color(0xFF9947EB);
 const _kInactiveColor = Color(0xFF6B7280);
 
 /// Ana Sayfa alt navigasyon çubuğu.
-/// 5 sekme: Ana Sayfa, Hazır Masallar, Sihirli Masallar, Favoriler, Rozetlerim
+/// 5 sekme: Ana Sayfa, Hazır Masallar, Sihirli Masallar, Favoriler, Profilim
 class HomeBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;

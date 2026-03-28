@@ -6,6 +6,8 @@ import '../main.dart'; // sleepModeProvider
 import '../services/tale_service.dart';
 import '../services/local_favorite_service.dart';
 import '../services/achievement_service.dart';
+import '../services/puzzle_service.dart';
+import '../services/image_export_service.dart';
 import '../widgets/appbar/home_bottom_nav.dart';
 
 /// Profil Sayfası
@@ -23,6 +25,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   List<String> _claimedAchievements = [];
   Map<String, int> _achievementProgresses = {};
   bool _isLoadingStats = true;
+  int _puzzleCount = 0;
+  List<int> _revealedIndices = [];
+  String _puzzleImage = '';
 
   @override
   void initState() {
@@ -53,6 +58,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         progresses[ach.id] = await AchievementService.getAchievementProgress(ach.id);
       }
 
+      final revealedIndices = await PuzzleService.getRevealedIndices();
+      final puzzleCount = revealedIndices.length;
+      final puzzleImage = await PuzzleService.getCurrentPuzzleImage();
+
       if (mounted) {
         setState(() {
           _taleCount = readCount;
@@ -60,6 +69,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _claimedAchievements = claimedList;
           _achievementProgresses = progresses;
           _favoriteCount = backendFavs + localFavs.length;
+          _puzzleCount = puzzleCount;
+          _revealedIndices = revealedIndices;
+          _puzzleImage = puzzleImage;
           _isLoadingStats = false;
         });
       }
@@ -121,50 +133,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ? displayName[0].toUpperCase()
         : (email.isNotEmpty ? email[0].toUpperCase() : '?');
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F6F8),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F6F8),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Profilim ve Başarımlar',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A2E),
-          ),
-        ),
-        actions: [
-          TextButton.icon(
-            onPressed: _signOut,
-            icon: const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 18),
-            label: const Text(
-              'Çıkış Yap',
-              style: TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        children: [
+          // ── Başlık Kısmı (AppBar yerine) ──────────────
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Profilim ve Başarımlar',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A2E),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: _signOut,
+                  icon: const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 18),
+                  label: const Text(
+                    'Çıkış Yap',
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 4),
-        ],
-      ),
-      bottomNavigationBar: HomeBottomNav(
-        currentIndex: 4,
-        onTap: (index) {
-          if (index != 4) {
-            context.go('/home', extra: {'index': index});
-          }
-        },
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        child: Column(
-          children: [
-            // ── Profil Başlığı ────────────────────────────
             _ProfileHeader(
               displayName: displayName,
               photoUrl: photoUrl,
@@ -176,7 +177,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 24),
             
             // ── Günün Puzzle'ı ────────────────────────────
-            const _DailyPuzzleCard(collectedCount: 1, totalCount: 7),
+            _DailyPuzzleCard(
+              collectedCount: _puzzleCount, 
+              revealedIndices: _revealedIndices,
+              totalCount: 9, 
+              imagePath: _puzzleImage,
+              onRefresh: _loadStats,
+            ),
             
             const SizedBox(height: 24),
 
@@ -193,8 +200,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 32),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -204,18 +210,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
 class _DailyPuzzleCard extends StatelessWidget {
   final int collectedCount;
+  final List<int> revealedIndices;
   final int totalCount;
+  final String imagePath;
+  final VoidCallback onRefresh;
 
   const _DailyPuzzleCard({
     required this.collectedCount,
+    required this.revealedIndices,
     required this.totalCount,
+    required this.imagePath,
+    required this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Toplam parça sayısını 9 olarak sabitliyoruz (3x3 grid)
+    const int effectiveTotal = 9;
+    bool isComplete = collectedCount >= effectiveTotal;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -230,51 +246,119 @@ class _DailyPuzzleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Günün Puzzle'ı",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // ── Puzzle Parçaları ────────────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(totalCount, (index) {
-              final isCollected = index < collectedCount;
-              return Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isCollected ? const Color(0xFF9947EB) : const Color(0xFFE5E7EB),
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    const Text(
+                      "Günün Puzzle'ı",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
+                    ),
+                    // TEST İÇİN: Gizli parça ekleme butonu
+                    IconButton(
+                      onPressed: () async {
+                        await PuzzleService.addPiece(bypassDailyLimit: true);
+                        onRefresh();
+                      },
+                      icon: const Icon(Icons.add_circle_outline, size: 16, color: Colors.grey),
+                    ),
+                  ],
                 ),
-              );
-            }),
+              ),
+              if (isComplete)
+                TextButton.icon(
+                  onPressed: () async {
+                    await ImageExportService.saveImage(imageUrl: imagePath);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('✅ Puzzle galerinize kaydedildi!')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.download_rounded, size: 18, color: Color(0xFF9947EB)),
+                  label: const Text('İndir', style: TextStyle(color: Color(0xFF9947EB), fontWeight: FontWeight.bold)),
+                ),
+            ],
           ),
           const SizedBox(height: 16),
-          // ── Durum Metni ────────────────────────────
-          Center(
-            child: Text(
-              'Bugün $collectedCount/$totalCount parça toplandı. Harikasın!',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF8A94A6),
-                fontWeight: FontWeight.w500,
-              ),
+          
+          // ── Puzzle Reveal Grid ───────────────────────────
+          AspectRatio(
+            aspectRatio: 1,
+            child: Stack(
+              children: [
+                // Arka plandaki tam resim
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(imagePath, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                ),
+                
+                // Üzerindeki kapatıcı parçalar (7 parça için 3x3 grid kullanıyoruz, son 2'si boş veya birleşik olabilir)
+                GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 2,
+                    mainAxisSpacing: 2,
+                  ),
+                  itemCount: effectiveTotal, 
+                  itemBuilder: (context, index) {
+                    bool revealed = revealedIndices.contains(index);
+                    
+                    return AnimatedOpacity(
+                      duration: const Duration(milliseconds: 500),
+                      opacity: revealed ? 0.0 : 1.0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF3F4F6).withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 0.5),
+                        ),
+                        child: Center(
+                          child: Icon(Icons.extension_rounded, color: Colors.indigo.withOpacity(0.2), size: 24),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
+          ),
+          
+          const SizedBox(height: 20),
+          // ── Durum Metni & Reset ────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  isComplete ? 'Tebrikler! Puzzle Tamamlandı 🎉' : '$collectedCount/$effectiveTotal parça toplandı.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isComplete ? const Color(0xFF9947EB) : const Color(0xFF8A94A6),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (isComplete)
+                TextButton(
+                  onPressed: () async {
+                    await PuzzleService.resetPuzzle();
+                    onRefresh();
+                  },
+                  style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                  child: const Text('Yenile', style: TextStyle(color: Color(0xFF8A94A6), fontSize: 13)),
+                ),
+            ],
           ),
         ],
       ),
     );
   }
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// BÖLÜM 1: Profil Başlığı
-// ────────────────────────────────────────────────────────────────────────────
 
 class _ProfileHeader extends StatelessWidget {
   final String displayName;
@@ -299,115 +383,115 @@ class _ProfileHeader extends StatelessWidget {
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const SizedBox(height: 12),
-        // ── Büyük yuvarlak avatar ─────────────────────────
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(20),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: photoUrl != null
-                ? Image.network(
-                    photoUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _buildInitial(initial),
-                  )
-                : _buildInitial(initial),
-          ),
-        ),
-
-        const SizedBox(height: 18),
-
-        // ── İsim (veya Başarım İsmi) ──────────────────────
-        Text(
-          () {
-            if (claimedAchievements.isEmpty) return displayName.isNotEmpty ? displayName : 'Kaşif';
-            // Aktif olan en son başarımı bul
-            final lastAchId = claimedAchievements.last;
-            final ach = AchievementService.achievements.firstWhere(
-              (a) => a.id == lastAchId, 
-              orElse: () => AchievementService.achievements.first
-            );
-            return ach.title; // Örneğin: Gümüş Kitap Kurdu
-          }(),
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A2E),
-            letterSpacing: 0.2,
-          ),
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 6),
-
-        // ── Masal sayısı ──────────────────────────────────
-        Text(
-          'Okunan Masal Sayısı: $taleCount',
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF6B7280),
-          ),
-        ),
-
-        const SizedBox(height: 4),
-
-        // ── Jeton Sayısı ──────────────────────────────────
-        if (tokens > 0)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/icons/coin.png',
-                width: 20,
-                height: 20,
-                errorBuilder: (context, error, stackTrace) => 
-                  const Icon(Icons.monetization_on, color: Color(0xFFFFC107), size: 20),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '$tokens Jeton Olarak Mükemmelsin',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFFBBF24),
+        children: [
+          const SizedBox(height: 12),
+          // ── Büyük yuvarlak avatar ─────────────────────────
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(20),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
                 ),
-              ),
-            ],
-          )
-        else
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.monetization_on_rounded, color: Color(0xFFFFC107), size: 20),
-              const SizedBox(width: 6),
-              const Text(
-                '0 Başarım Jetonu',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFFFC107),
-                ),
-              ),
-            ],
+              ],
+            ),
+            child: ClipOval(
+              child: photoUrl != null
+                  ? Image.network(
+                      photoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _buildInitial(initial),
+                    )
+                  : _buildInitial(initial),
+            ),
           ),
 
-        const SizedBox(height: 8),
-      ],
-    ),
+          const SizedBox(height: 18),
+
+          // ── İsim (veya Başarım İsmi) ──────────────────────
+          Text(
+            () {
+              if (claimedAchievements.isEmpty) return displayName.isNotEmpty ? displayName : 'Kaşif';
+              // Aktif olan en son başarımı bul
+              final lastAchId = claimedAchievements.last;
+              final ach = AchievementService.achievements.firstWhere(
+                (a) => a.id == lastAchId, 
+                orElse: () => AchievementService.achievements.first
+              );
+              return ach.title; // Örneğin: Gümüş Kitap Kurdu
+            }(),
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1A1A2E),
+              letterSpacing: 0.2,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: 6),
+
+          // ── Masal sayısı ──────────────────────────────────
+          Text(
+            'Okunan Masal Sayısı: $taleCount',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          // ── Jeton Sayısı ──────────────────────────────────
+          if (tokens > 0)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/icons/coin.png',
+                  width: 20,
+                  height: 20,
+                  errorBuilder: (context, error, stackTrace) => 
+                    const Icon(Icons.monetization_on, color: Color(0xFFFFC107), size: 20),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$tokens Jeton Olarak Mükemmelsin',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFBBF24),
+                  ),
+                ),
+              ],
+            )
+          else
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Icon(Icons.monetization_on_rounded, color: Color(0xFFFFC107), size: 20),
+                const SizedBox(width: 6),
+                const Text(
+                  '0 Başarım Jetonu',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFFC107),
+                  ),
+                ),
+              ],
+            ),
+
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 

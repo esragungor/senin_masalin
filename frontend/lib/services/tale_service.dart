@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'puzzle_service.dart';
 
 class TaleService {
   // ─── Backend URL Ayarı ──────────────────────────────────────────
@@ -13,11 +14,7 @@ class TaleService {
   // ────────────────────────────────────────────────────────────────
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-<<<<<<< HEAD
-    defaultValue: 'http://192.168.1.179:5000/api',
-=======
-    defaultValue: 'http://10.0.2.2:3000/api', // Emülatör varsayılan
->>>>>>> 202006f2fc7a49d4ccd1e514c6e0b60a3b849a5a
+    defaultValue: 'http://10.0.2.2:5000/api',
   );
 
   static Future<Map<String, dynamic>> generateTale({
@@ -62,6 +59,10 @@ class TaleService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         debugPrint('TaleService: Masal başarıyla üretildi!');
+        
+        // Puzzle parçasını üretildiğinde de ver (Kaydetmese bile kazansın)
+        await PuzzleService.addPiece();
+        
         return data;
       } else {
         debugPrint('TaleService: Masal üretilirken hata! Status: ${response.statusCode} Body: ${response.body}');
@@ -99,6 +100,10 @@ class TaleService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         debugPrint('TaleService: Masal başarıyla kaydedildi!');
+        
+        // Puzzle parçasını kontrol et ve ekle
+        await PuzzleService.addPiece();
+        
         return data;
       } else {
         debugPrint('TaleService: Masal kaydedilirken hata! Status: ${response.statusCode} Body: ${response.body}');
