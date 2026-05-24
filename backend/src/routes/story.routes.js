@@ -10,6 +10,7 @@ import {
 } from "../controllers/story.controller.js";
 import rateLimit from "express-rate-limit";
 import { authenticate } from "../middlewares/auth.middleware.js";
+import { profanityFilter } from "../middlewares/profanity.middleware.js";
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ const createStoryLimiter = rateLimit({
 });
 
 // ── Masal Endpoint'leri ────────────────────────────────────────────────────────
-router.post("/generate", authenticate, createStoryLimiter, createStory);
+router.post("/generate", authenticate, createStoryLimiter, profanityFilter, createStory);
 router.post("/save", authenticate, saveStory);
 router.get("/my-stories", authenticate, getMyStories);
 router.delete("/:id", authenticate, deleteStory);

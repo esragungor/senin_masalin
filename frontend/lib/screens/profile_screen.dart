@@ -1,6 +1,8 @@
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../main.dart'; // sleepModeProvider
 import '../services/tale_service.dart';
@@ -36,6 +38,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _loadStats() async {
+    // 1. Yerel verileri (Puzzle) HER DURUMDA yükle
+    await _loadPuzzleData();
+
+    // 2. Uzak verileri (Backend Stats) yükle
     try {
       final tales = await TaleService.getMyTales();
       final localFavs = await LocalFavoriteService.getFavorites();
@@ -58,10 +64,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         progresses[ach.id] = await AchievementService.getAchievementProgress(ach.id);
       }
 
-      final revealedIndices = await PuzzleService.getRevealedIndices();
-      final puzzleCount = revealedIndices.length;
-      final puzzleImage = await PuzzleService.getCurrentPuzzleImage();
-
       if (mounted) {
         setState(() {
           _taleCount = readCount;
@@ -69,14 +71,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _claimedAchievements = claimedList;
           _achievementProgresses = progresses;
           _favoriteCount = backendFavs + localFavs.length;
-          _puzzleCount = puzzleCount;
-          _revealedIndices = revealedIndices;
-          _puzzleImage = puzzleImage;
           _isLoadingStats = false;
         });
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('ProfileScreen: Backend verileri yüklenemedi (İnternet olmayabilir): $e');
       if (mounted) setState(() => _isLoadingStats = false);
+    }
+  }
+
+  Future<void> _loadPuzzleData() async {
+    try {
+      final revealedIndices = await PuzzleService.getRevealedIndices();
+      final puzzleCount = revealedIndices.length;
+      final puzzleImage = await PuzzleService.getCurrentPuzzleImage();
+
+      if (mounted) {
+        setState(() {
+          _revealedIndices = revealedIndices;
+          _puzzleCount = puzzleCount;
+          _puzzleImage = puzzleImage;
+        });
+      }
+    } catch (e) {
+      debugPrint('ProfileScreen: Puzzle verileri yüklenirken hata: $e');
     }
   }
 
@@ -143,12 +161,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Profilim ve Başarımlar',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A2E),
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.offWhite 
+                        : const Color(0xFF1A1A2E),
                   ),
                 ),
                 TextButton.icon(
@@ -229,20 +249,36 @@ class _DailyPuzzleCard extends StatelessWidget {
     const int effectiveTotal = 9;
     bool isComplete = collectedCount >= effectiveTotal;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(8),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: isDark ? 12 : 0, sigmaY: isDark ? 12 : 0),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? null : Colors.white,
+            gradient: isDark
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(24),
+            border: isDark ? Border.all(color: AppColors.pastelPurple.withAlpha(30), width: 1) : null,
+            boxShadow: [
+              if (isDark)
+                const BoxShadow(color: AppColors.premiumGlassGlow, blurRadius: 24, spreadRadius: -2),
+              BoxShadow(
+                color: isDark ? AppColors.premiumShadow : Colors.black.withAlpha(8),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -252,9 +288,13 @@ class _DailyPuzzleCard extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    const Text(
+                    Text(
                       "Günün Puzzle'ı",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
+                      style: TextStyle(
+                        fontSize: 18, 
+                        fontWeight: FontWeight.bold, 
+                        color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
+                      ),
                     ),
                     // TEST İÇİN: Gizli parça ekleme butonu
                     IconButton(
@@ -277,8 +317,8 @@ class _DailyPuzzleCard extends StatelessWidget {
                       );
                     }
                   },
-                  icon: const Icon(Icons.download_rounded, size: 18, color: Color(0xFF9947EB)),
-                  label: const Text('İndir', style: TextStyle(color: Color(0xFF9947EB), fontWeight: FontWeight.bold)),
+                  icon: Icon(Icons.download_rounded, size: 18, color: isDark ? AppColors.pastelPurple : const Color(0xFF9947EB)),
+                  label: Text('İndir', style: TextStyle(color: isDark ? AppColors.pastelPurple : const Color(0xFF9947EB), fontWeight: FontWeight.bold)),
                 ),
             ],
           ),
@@ -292,7 +332,21 @@ class _DailyPuzzleCard extends StatelessWidget {
                 // Arka plandaki tam resim
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(imagePath, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                  child: imagePath.trim().isEmpty 
+                    ? Container(
+                        color: isDark ? AppColors.midnightNavy.withAlpha(50) : const Color(0xFFF3F4F6),
+                        child: const Center(child: Icon(Icons.image_outlined, color: Colors.grey)),
+                      )
+                    : Image.asset(
+                        imagePath, 
+                        fit: BoxFit.cover, 
+                        width: double.infinity, 
+                        height: double.infinity,
+                        errorBuilder: (ctx, err, stack) => Container(
+                          color: isDark ? AppColors.midnightNavy.withAlpha(50) : const Color(0xFFF3F4F6),
+                          child: const Center(child: Icon(Icons.broken_image_rounded, color: Colors.grey)),
+                        ),
+                      ),
                 ),
                 
                 // Üzerindeki kapatıcı parçalar (7 parça için 3x3 grid kullanıyoruz, son 2'si boş veya birleşik olabilir)
@@ -312,9 +366,16 @@ class _DailyPuzzleCard extends StatelessWidget {
                       opacity: revealed ? 0.0 : 1.0,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6).withOpacity(0.95),
+                          color: isDark 
+                              ? AppColors.midnightNavy.withAlpha(200) 
+                              : const Color(0xFFF3F4F6).withOpacity(0.95),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 0.5),
+                          border: Border.all(
+                            color: isDark 
+                                ? AppColors.pastelPurple.withAlpha(50) 
+                                : Colors.white.withOpacity(0.5), 
+                            width: 0.5
+                          ),
                         ),
                         child: Center(
                           child: Icon(Icons.extension_rounded, color: Colors.indigo.withOpacity(0.2), size: 24),
@@ -337,7 +398,9 @@ class _DailyPuzzleCard extends StatelessWidget {
                   isComplete ? 'Tebrikler! Puzzle Tamamlandı 🎉' : '$collectedCount/$effectiveTotal parça toplandı.',
                   style: TextStyle(
                     fontSize: 13,
-                    color: isComplete ? const Color(0xFF9947EB) : const Color(0xFF8A94A6),
+                    color: isComplete 
+                        ? (isDark ? AppColors.pastelPurple : const Color(0xFF9947EB)) 
+                        : (isDark ? AppColors.lavenderGrey : const Color(0xFF8A94A6)),
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -355,6 +418,8 @@ class _DailyPuzzleCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+      ),
       ),
     );
   }
@@ -405,9 +470,9 @@ class _ProfileHeader extends StatelessWidget {
                   ? Image.network(
                       photoUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildInitial(initial),
+                      errorBuilder: (_, __, ___) => _buildInitial(context, initial),
                     )
-                  : _buildInitial(initial),
+                  : _buildInitial(context, initial),
             ),
           ),
 
@@ -425,10 +490,12 @@ class _ProfileHeader extends StatelessWidget {
               );
               return ach.title; // Örneğin: Gümüş Kitap Kurdu
             }(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.offWhite 
+                  : const Color(0xFF1A1A2E),
               letterSpacing: 0.2,
             ),
             textAlign: TextAlign.center,
@@ -439,9 +506,11 @@ class _ProfileHeader extends StatelessWidget {
           // ── Masal sayısı ──────────────────────────────────
           Text(
             'Okunan Masal Sayısı: $taleCount',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF6B7280),
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? AppColors.lavenderGrey 
+                  : const Color(0xFF6B7280),
             ),
           ),
 
@@ -495,16 +564,17 @@ class _ProfileHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildInitial(String initial) {
+  Widget _buildInitial(BuildContext context, String initial) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: const Color(0xFFEEEDFC),
+      color: isDark ? AppColors.midnightNavy.withAlpha(200) : const Color(0xFFEEEDFC),
       child: Center(
         child: Text(
           initial,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF9947EB),
+            color: isDark ? AppColors.pastelPurple : const Color(0xFF9947EB),
           ),
         ),
       ),
@@ -582,19 +652,35 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(8),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: isDark ? 12 : 0, sigmaY: isDark ? 12 : 0),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+          decoration: BoxDecoration(
+            color: isDark ? null : Colors.white,
+            gradient: isDark
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(16),
+            border: isDark ? Border.all(color: AppColors.pastelPurple.withAlpha(30), width: 1) : null,
+            boxShadow: [
+              if (isDark)
+                const BoxShadow(color: AppColors.premiumGlassGlow, blurRadius: 16, spreadRadius: -2),
+              BoxShadow(
+                color: isDark ? AppColors.premiumShadow : Colors.black.withAlpha(8),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-        ],
-      ),
       child: Column(
         children: [
           Container(
@@ -609,21 +695,26 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
+              color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF1A1A2E)),
+            style: TextStyle(
+              fontSize: 12, 
+              color: isDark ? AppColors.lavenderGrey : const Color(0xFF1A1A2E)
+            ),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
+      ),
+      ),
       ),
     );
   }
@@ -638,18 +729,34 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(8),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: isDark ? 12 : 0, sigmaY: isDark ? 12 : 0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? null : Colors.white,
+            gradient: isDark
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(20),
+            border: isDark ? Border.all(color: AppColors.pastelPurple.withAlpha(30), width: 1) : null,
+            boxShadow: [
+              if (isDark)
+                const BoxShadow(color: AppColors.premiumGlassGlow, blurRadius: 20, spreadRadius: -2),
+              BoxShadow(
+                color: isDark ? AppColors.premiumShadow : Colors.black.withAlpha(8),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-        ],
-      ),
       child: Column(
         children: [
           _SettingsTile(
@@ -678,6 +785,8 @@ class _SettingsSection extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      ),
       ),
     );
   }
@@ -721,15 +830,22 @@ class _SettingsTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A2E),
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.offWhite 
+                        : const Color(0xFF1A1A2E),
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF8A94A6)),
+                  style: TextStyle(
+                    fontSize: 12, 
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.lavenderGrey 
+                        : const Color(0xFF8A94A6)
+                  ),
                 ),
               ],
             ),

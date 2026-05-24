@@ -1,6 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_colors.dart';
 import 'profile_screen.dart';
 import '../widgets/appbar/home_appbar.dart';
 import '../widgets/appbar/home_bottom_nav.dart';
@@ -11,6 +13,7 @@ import '../features/ready_tales/ready_tale_model.dart';
 import '../features/ready_tales/widgets/ready_tale_card.dart';
 import '../services/local_favorite_service.dart';
 import '../main.dart';
+import '../widgets/star_background.dart';
 
 /// Ana Sayfa
 class HomeScreen extends ConsumerStatefulWidget {
@@ -254,9 +257,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F6F8),
-      appBar: selectedIndex == 4 ? null : HomeAppBar(currentIndex: selectedIndex),
+    final isDark = ref.watch(sleepModeProvider);
+
+    return StarBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: selectedIndex == 4 ? null : HomeAppBar(currentIndex: selectedIndex),
       bottomNavigationBar: HomeBottomNav(
         currentIndex: selectedIndex,
         onTap: (index) {
@@ -280,7 +286,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         index: selectedIndex,
         children: _screens,
       ),
-    );
+    ));
   }
 }
 
@@ -348,81 +354,107 @@ class _MagicHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEEEDFC),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(12),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: isDark ? 12 : 0, sigmaY: isDark ? 12 : 0),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: isDark ? null : const Color(0xFFEEEDFC),
+            gradient: isDark
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(24),
+            border: isDark
+                ? Border.all(color: AppColors.pastelPurple.withAlpha(30), width: 1)
+                : null,
+            boxShadow: [
+              if (isDark)
+                const BoxShadow(
+                  color: AppColors.premiumGlassGlow,
+                  blurRadius: 24,
+                  spreadRadius: -2,
+                ),
+              BoxShadow(
+                color: isDark ? AppColors.premiumShadow : Colors.black.withAlpha(12),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF9947EB),
-            ),
-            child: const Icon(
-              Icons.auto_fix_high_rounded,
-              color: Colors.white,
-              size: 26,
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Sihirli Bir Macera Başlat',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Hayalindeki karakterleri seç\nve kendi masalını hemen oluştur!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF8A94A6),
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: ElevatedButton.icon(
-              onPressed: onAction,
-              icon: const Text('✨', style: TextStyle(fontSize: 18)),
-              label: const Text(
-                'Yeni Masal Oluştur',
+          child: Column(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? AppColors.pastelPurple.withAlpha(100) : const Color(0xFF9947EB),
+                ),
+                child: Icon(
+                  Icons.auto_fix_high_rounded,
+                  color: isDark ? AppColors.pastelPurple : Colors.white,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Sihirli Bir Macera Başlat',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF9947EB),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 6),
+              Text(
+                'Hayalindeki karakterleri seç\nve kendi masalını hemen oluştur!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? AppColors.lavenderGrey : const Color(0xFF8A94A6),
+                  height: 1.4,
                 ),
               ),
-            ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: onAction,
+                  icon: const Text('✨', style: TextStyle(fontSize: 18)),
+                  label: const Text(
+                    'Yeni Masal Oluştur',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark 
+                        ? AppColors.pastelPurple.withAlpha(200)
+                        : const Color(0xFF9947EB),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -449,12 +481,14 @@ class _RecentTalesSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Sihirli Masallarım',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A2E),
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppColors.offWhite 
+                    : const Color(0xFF1A1A2E),
               ),
             ),
             TextButton(
@@ -463,12 +497,14 @@ class _RecentTalesSection extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text(
+              child: Text(
                 'Tümünü Gör',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF9947EB),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? AppColors.pastelPurple 
+                      : const Color(0xFF9947EB),
                 ),
               ),
             ),
@@ -500,32 +536,64 @@ class _RecentTalesSection extends StatelessWidget {
 class _EmptyTalesState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFEEEDFC), width: 1.5),
-      ),
-      child: const Column(
-        children: [
-          Text('📖', style: TextStyle(fontSize: 36)),
-          SizedBox(height: 10),
-          Text(
-            'Henüz masalın yok',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1A2E),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+            sigmaX: Theme.of(context).brightness == Brightness.dark ? 8 : 0,
+            sigmaY: Theme.of(context).brightness == Brightness.dark ? 8 : 0),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 28),
+          decoration: BoxDecoration(
+            color: isDark ? null : Colors.white,
+            gradient: isDark
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.pastelPurple.withAlpha(30)
+                  : const Color(0xFFEEEDFC),
+              width: 1.5,
             ),
+            boxShadow: [
+              if (isDark)
+                const BoxShadow(color: AppColors.premiumGlassGlow, blurRadius: 24, spreadRadius: -2),
+              BoxShadow(
+                color: isDark ? AppColors.premiumShadow : Colors.black.withAlpha(8),
+                blurRadius: 20,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          SizedBox(height: 4),
-          Text(
-            'İlk masalını oluştur ve burada görün!',
-            style: TextStyle(fontSize: 13, color: Color(0xFF8A94A6)),
+          child: Column(
+            children: [
+              const Text('📖', style: TextStyle(fontSize: 36)),
+              const SizedBox(height: 10),
+              Text(
+                'Henüz masalın yok',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? AppColors.offWhite 
+                      : const Color(0xFF1A1A2E),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'İlk masalını oluştur ve burada görün!',
+                style: TextStyle(fontSize: 13, color: Color(0xFF8A94A6)),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -642,7 +710,7 @@ class _TaleCard extends StatelessWidget {
                         colors: [Color(0xFF9947EB), Color(0xFF6B2DBF)],
                       ),
                     ),
-                    child: coverUrl != null
+                    child: (coverUrl != null && coverUrl.trim().isNotEmpty)
                         ? (coverUrl.startsWith('http')
                             ? Image.network(
                                 coverUrl,
@@ -717,10 +785,12 @@ class _TaleCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A2E),
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppColors.offWhite 
+                    : const Color(0xFF1A1A2E),
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -728,7 +798,12 @@ class _TaleCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               timeAgo,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF8A94A6)),
+              style: TextStyle(
+                fontSize: 11, 
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppColors.lavenderGrey 
+                    : const Color(0xFF8A94A6)
+              ),
             ),
           ],
         ),
@@ -777,10 +852,12 @@ class _PredefinedTalesTab extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     category,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A1A2E),
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? AppColors.offWhite 
+                          : const Color(0xFF1A1A2E),
                     ),
                   ),
                 ),

@@ -1,9 +1,14 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_colors.dart';
+import '../widgets/star_background.dart';
+import '../main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Yeni Masal Oluştur — Adım 2: Tema ve Detaylar
 /// Tema seçimi, yan karakter, özel nesne ve öğüt alınır.
-class CreateTaleStep2Screen extends StatefulWidget {
+class CreateTaleStep2Screen extends ConsumerStatefulWidget {
   final String childName;
   final int childAge;
   final String gender;
@@ -18,10 +23,10 @@ class CreateTaleStep2Screen extends StatefulWidget {
   });
 
   @override
-  State<CreateTaleStep2Screen> createState() => _CreateTaleStep2ScreenState();
+  ConsumerState<CreateTaleStep2Screen> createState() => _CreateTaleStep2ScreenState();
 }
 
-class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
+class _CreateTaleStep2ScreenState extends ConsumerState<CreateTaleStep2Screen> {
   final TextEditingController _companionController = TextEditingController();
   final TextEditingController _objectController = TextEditingController();
   final TextEditingController _moralController = TextEditingController();
@@ -55,9 +60,10 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
       _companionController.text.trim().isNotEmpty &&
       _objectController.text.trim().isNotEmpty;
 
-  Color get _dynamicBg {
+  Color _dynamicBg(bool isDark) {
+    if (isDark) return Colors.transparent;
     if (widget.gender == 'kız') return const Color(0xFFFFF0F5);
-    if (widget.gender == 'erkek') return const Color(0xFFDBEAFE); // Updated darker, soft blue
+    if (widget.gender == 'erkek') return const Color(0xFFDBEAFE);
     return _bgColor;
   }
 
@@ -85,25 +91,28 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _dynamicBg,
-      appBar: AppBar(
+    final isDark = ref.watch(sleepModeProvider);
+
+    return StarBackground(
+      child: Scaffold(
+        backgroundColor: _dynamicBg(isDark),
+        appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF1A1A2E), size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E), size: 20),
           onPressed: () => context.pop(),
         ),
         title: Column(
           children: [
-            const Text(
+            Text(
               'Yeni Masal Oluştur',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A2E),
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
               ),
             ),
             const SizedBox(height: 2),
@@ -121,8 +130,8 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.close_rounded,
-                color: Color(0xFF1A1A2E), size: 22),
+            icon: Icon(Icons.close_rounded,
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E), size: 22),
             onPressed: () => context.go('/home'),
           ),
         ],
@@ -130,8 +139,8 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
           preferredSize: const Size.fromHeight(4),
           child: LinearProgressIndicator(
             value: 2 / 3,
-            backgroundColor: const Color(0xFFE2E8F0),
-            valueColor: AlwaysStoppedAnimation<Color>(_purple),
+            backgroundColor: isDark ? AppColors.offWhite.withAlpha(30) : const Color(0xFFE2E8F0),
+            valueColor: AlwaysStoppedAnimation<Color>(isDark ? AppColors.pastelPurple : _purple),
             minHeight: 4,
           ),
         ),
@@ -155,6 +164,7 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
                     hint: 'Örn: En yakın arkadaşı, bir köpek...',
                     icon: Icons.group_rounded,
                     controller: _companionController,
+                    isDark: isDark,
                   ),
                   const SizedBox(height: 16),
 
@@ -163,6 +173,7 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
                     hint: 'Örn: Uçan halı, sihirli kılıç...',
                     icon: Icons.auto_awesome_rounded,
                     controller: _objectController,
+                    isDark: isDark,
                   ),
                   const SizedBox(height: 16),
 
@@ -171,16 +182,17 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
                     hint: 'Örn: Yalan söylememek, paylaşmak...',
                     icon: Icons.lightbulb_rounded,
                     controller: _moralController,
+                    isDark: isDark,
                   ),
                   const SizedBox(height: 16),
 
                   // ── Hazır Öğütler (Chips) ─────────────────
-                  const Text(
+                  Text(
                     'Veya hızlıca seç:',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A2E),
+                      color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -208,10 +220,10 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
                             alignment: Alignment.center,
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             decoration: BoxDecoration(
-                              color: bgColor.withAlpha(150),
+                              color: isDark ? bgColor.withAlpha(40) : bgColor.withAlpha(150),
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(
-                                color: borderColor.withAlpha(100),
+                                color: isDark ? borderColor.withAlpha(150) : borderColor.withAlpha(100),
                                 width: 1.5,
                               ),
                             ),
@@ -220,14 +232,16 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
                               children: [
                                 Text(emoji, style: const TextStyle(fontSize: 18)),
                                 const SizedBox(width: 8),
-                                Text(
-                                  title,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: borderColor.withBlue(borderColor.blue ~/ 2).withRed(borderColor.red ~/ 2).withGreen(borderColor.green ~/ 2).withAlpha(255),
+                                  Text(
+                                    title,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark 
+                                          ? AppColors.offWhite 
+                                          : borderColor.withBlue(borderColor.blue ~/ 2).withRed(borderColor.red ~/ 2).withGreen(borderColor.green ~/ 2).withAlpha(255),
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
@@ -253,9 +267,9 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _purple,
-                        disabledBackgroundColor: const Color(0xFFEEEDFC),
-                        disabledForegroundColor: const Color(0xFFB0BAC9),
+                        backgroundColor: isDark ? AppColors.pastelPurple : _purple,
+                        disabledBackgroundColor: isDark ? AppColors.pastelPurple.withAlpha(50) : const Color(0xFFEEEDFC),
+                        disabledForegroundColor: isDark ? AppColors.offWhite.withAlpha(80) : const Color(0xFFB0BAC9),
 
                         foregroundColor: Colors.white,
                         elevation: 0,
@@ -272,6 +286,7 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -280,44 +295,61 @@ class _CreateTaleStep2ScreenState extends State<CreateTaleStep2Screen> {
     required String hint,
     required IconData icon,
     required TextEditingController controller,
+    required bool isDark,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1A1A2E),
+            color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withAlpha(6),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2)),
-            ],
-          ),
-          child: TextField(
-            controller: controller,
-            style: const TextStyle(fontSize: 15, color: Color(0xFF1A1A2E)),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(color: Color(0xFFB0BAC9), fontSize: 14),
-              prefixIcon: Icon(icon, color: const Color(0xFFB0BAC9), size: 20),
-              border: OutlineInputBorder(
+        ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: isDark ? 10 : 0, sigmaY: isDark ? 10 : 0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? null : Colors.white,
+                gradient: isDark
+                    ? const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                      )
+                    : null,
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide.none,
+                border: isDark ? Border.all(color: AppColors.pastelPurple.withAlpha(50), width: 1) : null,
+                boxShadow: [
+                  if (isDark)
+                    const BoxShadow(color: AppColors.premiumGlassGlow, blurRadius: 14, spreadRadius: -2),
+                  BoxShadow(
+                      color: isDark ? AppColors.premiumShadow : Colors.black.withAlpha(6),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2)),
+                ],
               ),
-              filled: true,
-              fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: TextField(
+                controller: controller,
+                style: TextStyle(fontSize: 15, color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E)),
+                decoration: InputDecoration(
+                  hintText: hint,
+                  hintStyle: TextStyle(color: isDark ? AppColors.lavenderGrey.withAlpha(150) : const Color(0xFFB0BAC9), fontSize: 14),
+                  prefixIcon: Icon(icon, color: isDark ? AppColors.pastelPurple.withAlpha(150) : const Color(0xFFB0BAC9), size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+              ),
             ),
           ),
         ),

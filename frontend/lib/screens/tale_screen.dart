@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
@@ -10,9 +10,13 @@ import '../services/achievement_service.dart';
 import '../services/image_export_service.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gal/gal.dart';
+import '../widgets/star_background.dart';
+import '../main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../theme/app_colors.dart';
 
 /// Oluşturulan masalın okunduğu ekran.
-class TaleScreen extends StatefulWidget {
+class TaleScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> storyData;
 
   const TaleScreen({
@@ -21,10 +25,10 @@ class TaleScreen extends StatefulWidget {
   });
 
   @override
-  State<TaleScreen> createState() => _TaleScreenState();
+  ConsumerState<TaleScreen> createState() => _TaleScreenState();
 }
 
-class _TaleScreenState extends State<TaleScreen> {
+class _TaleScreenState extends ConsumerState<TaleScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final TTSService _ttsService = TTSService();
@@ -244,9 +248,10 @@ class _TaleScreenState extends State<TaleScreen> {
            context.go('/home');
         }
       },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFFAF9FF),
-        appBar: TaleAppBar(
+      child: StarBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: TaleAppBar(
           currentPage: _currentPage,
           pageCount: _pages.length,
           onNameChange: _isReadyTale ? _showChangeNameDialog : null,
@@ -318,6 +323,7 @@ class _TaleScreenState extends State<TaleScreen> {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -353,27 +359,51 @@ class _TalePage extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ── Metin Kartı ───────────────────────────────
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(10),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                  sigmaX: Theme.of(context).brightness == Brightness.dark ? 12 : 0,
+                  sigmaY: Theme.of(context).brightness == Brightness.dark ? 12 : 0),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? null 
+                      : Colors.white,
+                  gradient: Theme.of(context).brightness == Brightness.dark
+                      ? const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                        )
+                      : null,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Theme.of(context).brightness == Brightness.dark 
+                      ? Border.all(color: AppColors.pastelPurple.withAlpha(30), width: 1)
+                      : null,
+                  boxShadow: [
+                    if (Theme.of(context).brightness == Brightness.dark)
+                      const BoxShadow(color: AppColors.premiumGlassGlow, blurRadius: 24, spreadRadius: -2),
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.dark ? AppColors.premiumShadow : Colors.black.withAlpha(10),
+                      blurRadius: 20,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 18,
-                height: 1.7,
-                color: Color(0xFF2D2D3A),
-                fontWeight: FontWeight.w400,
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 18,
+                    height: 1.7,
+                    color: Theme.of(context).brightness == Brightness.dark 
+                        ? AppColors.offWhite 
+                        : const Color(0xFF2D2D3A),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
               ),
             ),
           ),
@@ -406,13 +436,15 @@ class _TalePage extends StatelessWidget {
                     maxScale: 4.0,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: imgUrl.startsWith('http')
-                          ? Image.network(
-                              imgUrl,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => _errorPlaceholder(),
-                            )
-                          : Image.asset(imgUrl, fit: BoxFit.contain),
+                      child: imgUrl.trim().isEmpty
+                          ? _errorPlaceholder()
+                          : (imgUrl.startsWith('http')
+                              ? Image.network(
+                                  imgUrl,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => _errorPlaceholder(),
+                                )
+                              : Image.asset(imgUrl, fit: BoxFit.contain)),
                     ),
                   ),
 

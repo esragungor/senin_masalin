@@ -51,8 +51,13 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: "Sunucu tarafında bir hata oluştu!", details: err.message });
 });
 
+import { initProfanityFilter } from "./middlewares/profanity.middleware.js";
+
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
+    // Sunucu baslarken kufur filtresini de baslat
+    await initProfanityFilter();
+    
     console.log(`Server is running on http://0.0.0.0:${PORT}`);
     console.log(`Also accessible via http://localhost:${PORT}`);
     console.log(`Android Emulator: http://10.0.2.2:${PORT}`);

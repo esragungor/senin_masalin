@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../theme/app_colors.dart';
 import '../ready_tale_model.dart';
 
 /// Hazır masala tıklandığında açılan "Kahraman kim olsun?" diyalogu.
@@ -61,10 +62,13 @@ class _ReadyTaleDetailScreenState extends State<ReadyTaleDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.midnightNavy : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        border: isDark ? Border(top: BorderSide(color: AppColors.pastelPurple.withAlpha(50), width: 1)) : null,
       ),
       padding: const EdgeInsets.fromLTRB(28, 12, 28, 32),
       child: Column(
@@ -76,7 +80,7 @@ class _ReadyTaleDetailScreenState extends State<ReadyTaleDetailScreen> {
             width: 48,
             height: 5,
             decoration: BoxDecoration(
-              color: const Color(0xFFE2E8F0),
+              color: isDark ? AppColors.lavenderGrey.withAlpha(100) : const Color(0xFFE2E8F0),
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -95,13 +99,13 @@ class _ReadyTaleDetailScreenState extends State<ReadyTaleDetailScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF9947EB).withOpacity(0.3),
+                  color: (isDark ? AppColors.pastelPurple : const Color(0xFF9947EB)).withOpacity(0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: widget.tale.coverAsset != null
+            child: widget.tale.coverAsset != null && widget.tale.coverAsset!.trim().isNotEmpty
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: Image.asset(
@@ -117,10 +121,10 @@ class _ReadyTaleDetailScreenState extends State<ReadyTaleDetailScreen> {
           Text(
             widget.tale.title.replaceAll('{{PROTAGONIST}}', widget.tale.defaultProtagonist),
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A2E),
+              color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
             ),
           ),
           const SizedBox(height: 8),
@@ -129,7 +133,7 @@ class _ReadyTaleDetailScreenState extends State<ReadyTaleDetailScreen> {
             'Bu masalın kahramanı kim olsun?',
             style: TextStyle(
               fontSize: 15,
-              color: const Color(0xFF8A94A6),
+              color: isDark ? AppColors.lavenderGrey : const Color(0xFF8A94A6),
               height: 1.4,
             ),
             textAlign: TextAlign.center,
@@ -139,17 +143,20 @@ class _ReadyTaleDetailScreenState extends State<ReadyTaleDetailScreen> {
           // ── İsim Girişi ────────────────────────────────────
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: isDark ? AppColors.midnightNavy.withAlpha(150) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+              border: Border.all(
+                color: isDark ? AppColors.pastelPurple.withAlpha(80) : const Color(0xFFE2E8F0),
+                width: 1.5,
+              ),
             ),
             child: TextField(
               controller: _nameController,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
               ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
@@ -180,7 +187,7 @@ class _ReadyTaleDetailScreenState extends State<ReadyTaleDetailScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF9947EB),
+                backgroundColor: isDark ? AppColors.pastelPurple : const Color(0xFF9947EB),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(

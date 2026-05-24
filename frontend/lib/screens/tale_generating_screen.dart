@@ -1,10 +1,15 @@
+import 'dart:ui';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/tale_service.dart';
+import '../theme/app_colors.dart';
+import '../widgets/star_background.dart';
+import '../main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// "Masalı Oluştur" butonuna basıldıktan sonra gösterilen yükleme ekranı.
-class TaleGeneratingScreen extends StatefulWidget {
+class TaleGeneratingScreen extends ConsumerStatefulWidget {
   final String? childName;
   final int? childAge;
   final String? gender;
@@ -25,10 +30,10 @@ class TaleGeneratingScreen extends StatefulWidget {
   });
 
   @override
-  State<TaleGeneratingScreen> createState() => _TaleGeneratingScreenState();
+  ConsumerState<TaleGeneratingScreen> createState() => _TaleGeneratingScreenState();
 }
 
-class _TaleGeneratingScreenState extends State<TaleGeneratingScreen>
+class _TaleGeneratingScreenState extends ConsumerState<TaleGeneratingScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _dotController;
 
@@ -40,7 +45,8 @@ class _TaleGeneratingScreenState extends State<TaleGeneratingScreen>
   int _msgIndex = 0;
   late Timer _msgTimer;
 
-  Color get _bgColor {
+  Color _bgColor(bool isDark) {
+    if (isDark) return Colors.transparent;
     if (widget.gender == 'erkek') return const Color(0xFFEEF4FF);
     return const Color(0xFFFFF0F5);
   }
@@ -125,24 +131,27 @@ class _TaleGeneratingScreenState extends State<TaleGeneratingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF1A1A2E), size: 20),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/home');
-            }
-          },
+    final isDark = ref.watch(sleepModeProvider);
+
+    return StarBackground(
+      child: Scaffold(
+        backgroundColor: _bgColor(isDark),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E), size: 20),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/home');
+              }
+            },
+          ),
         ),
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(28, 80, 28, 40),
@@ -150,22 +159,36 @@ class _TaleGeneratingScreenState extends State<TaleGeneratingScreen>
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // ── Beyaz kart ──────────────────────────────
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(14),
-                      blurRadius: 30,
-                      offset: const Offset(0, 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: isDark ? 16 : 0, sigmaY: isDark ? 16 : 0),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+                    decoration: BoxDecoration(
+                      color: isDark ? null : Colors.white,
+                      gradient: isDark
+                          ? const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [AppColors.premiumGlassGradientStart, AppColors.premiumGlassGradientEnd],
+                            )
+                          : null,
+                      borderRadius: BorderRadius.circular(28),
+                      border: isDark ? Border.all(color: AppColors.pastelPurple.withAlpha(30), width: 1) : null,
+                      boxShadow: [
+                        if (isDark)
+                          const BoxShadow(color: AppColors.premiumGlassGlow, blurRadius: 28, spreadRadius: -2),
+                        BoxShadow(
+                          color: isDark ? AppColors.premiumShadow : Colors.black.withAlpha(14),
+                          blurRadius: 30,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
+                    child: Column(
+                      children: [
                     // ── Görsel ────────────────────────────
                     ClipRRect(
                       borderRadius: BorderRadius.circular(18),
@@ -208,10 +231,10 @@ class _TaleGeneratingScreenState extends State<TaleGeneratingScreen>
                         return Text(
                           'Sihirli Masalınız\nHazırlanıyor$dots',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A1A2E),
+                            color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
                             height: 1.3,
                           ),
                         );
@@ -227,9 +250,9 @@ class _TaleGeneratingScreenState extends State<TaleGeneratingScreen>
                         _messages[_msgIndex],
                         key: ValueKey(_msgIndex),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF8A94A6),
+                          color: isDark ? AppColors.lavenderGrey : const Color(0xFF8A94A6),
                           height: 1.5,
                         ),
                       ),
@@ -237,9 +260,12 @@ class _TaleGeneratingScreenState extends State<TaleGeneratingScreen>
                   ],
                 ),
               ),
+              ),
+              ),
             ],
           ),
         ),
+      ),
       ),
     );
   }

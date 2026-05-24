@@ -3,6 +3,23 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// 503 veya 429 hatalarında yeniden deneme yardımcısı
+async function retryWithBackoff(fn, maxRetries = 2, delayMs = 3000) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const isRetryable = err?.status === 503 || err?.status === 429;
+      if (isRetryable && attempt < maxRetries) {
+        console.warn(`⚠️ Gemini ${err.status} hatası – ${delayMs / 1000}s sonra tekrar deneniyor... (${attempt + 1}/${maxRetries})`);
+        await new Promise(r => setTimeout(r, delayMs));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 class GeminiService {
   constructor() {
     // API Key'in boş gelmediğinden emin olalım
@@ -10,8 +27,12 @@ class GeminiService {
       throw new Error("GEMINI_API_KEY .env dosyasında bulunamadı!");
     }
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Masal üretimi için güncel ve hızlı model
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // Birincil model
+    this.primaryModel = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // 503 durumunda yedek model
+    this.fallbackModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Geriye dönük uyumluluk
+    this.model = this.primaryModel;
   }
 
   async generateStory(params) {
@@ -54,52 +75,60 @@ class GeminiService {
     }
     `;
 
+    // Metni üret: önce 2.5-flash dene, 503 devam ederse 1.5-flash'a geç
+    let rawText;
     try {
-      const result = await this.model.generateContent(basePrompt);
-      const response = await result.response;
-      let text = response.text();
-
-      // JSON'u daha güvenli temizleme (Markdown kod blokları vs.)
-      text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      const startIndex = text.indexOf('{');
-      const endIndex = text.lastIndexOf('}');
-      if (startIndex !== -1 && endIndex !== -1) {
-        text = text.slice(startIndex, endIndex + 1);
+      rawText = await retryWithBackoff(async () => {
+        const result = await this.primaryModel.generateContent(basePrompt);
+        return result.response.text();
+      });
+    } catch (primaryErr) {
+      if (primaryErr?.status === 503 || primaryErr?.status === 429) {
+        console.warn("⚠️ gemini-2.5-flash erişilemiyor, gemini-1.5-flash'a geçiliyor...");
+        const result = await this.fallbackModel.generateContent(basePrompt);
+        rawText = result.response.text();
+      } else {
+        console.error("Gemini Detaylı Hata:", primaryErr);
+        throw primaryErr;
       }
-
-      const storyData = JSON.parse(text);
-
-      console.log("📖 Story text generated, now generating images...");
-
-      // Resim üretimini dene, hata olursa masalı yine de döndür
-      try {
-        const { default: falAiService } = await import('./falai.service.js');
-
-        const imagePrompts = storyData.segments.map(seg => {
-          return `Pixar/Disney 3D animation style, very cute, high quality, colorful, magical, vibrant colors, soft lighting, 8k resolution, children's book illustration. Scene description: ${seg.text}`;
-        });
-
-        const imageUrls = await falAiService.generateImages(imagePrompts);
-
-        storyData.segments.forEach((segment, index) => {
-          segment.imageUrl = imageUrls[index];
-        });
-
-        console.log("✅ Story complete with images!");
-      } catch (imageError) {
-        console.error("⚠️ Resim üretimi başarısız, masalı resimsiz döndürüyoruz:", imageError.message);
-        // Placeholder resim URL'si ata
-        storyData.segments.forEach((segment) => {
-          segment.imageUrl = null;
-        });
-      }
-      return storyData;
-
-    } catch (error) {
-      console.error("Gemini Detaylı Hata:", error);
-      throw error;
     }
+
+    // JSON'u daha güvenli temizleme (Markdown kod blokları vs.)
+    let text = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+    const startIndex = text.indexOf('{');
+    const endIndex = text.lastIndexOf('}');
+    if (startIndex !== -1 && endIndex !== -1) {
+      text = text.slice(startIndex, endIndex + 1);
+    }
+
+    const storyData = JSON.parse(text);
+
+    console.log("📖 Story text generated, now generating images...");
+
+    // Resim üretimini dene, hata olursa masalı yine de döndür
+    try {
+      const { default: falAiService } = await import('./falai.service.js');
+
+      const imagePrompts = storyData.segments.map(seg => {
+        return `Pixar/Disney 3D animation style, very cute, high quality, colorful, magical, vibrant colors, soft lighting, 8k resolution, children's book illustration. Scene description: ${seg.text}`;
+      });
+
+      const imageUrls = await falAiService.generateImages(imagePrompts);
+
+      storyData.segments.forEach((segment, index) => {
+        segment.imageUrl = imageUrls[index];
+      });
+
+      console.log("✅ Story complete with images!");
+    } catch (imageError) {
+      console.error("⚠️ Resim üretimi başarısız, masalı resimsiz döndürüyoruz:", imageError.message);
+      // Placeholder resim URL'si ata
+      storyData.segments.forEach((segment) => {
+        segment.imageUrl = null;
+      });
+    }
+    return storyData;
   }
 }
 
-export default new GeminiService();
+export default new GeminiService();

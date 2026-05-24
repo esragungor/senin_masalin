@@ -65,5 +65,45 @@ class AppColors {
 
   /// Google butonu kenarlık rengi
   static const Color authGoogleButtonBorder = Color(0xFFE2E8F0);
+
+  // ════════════════════════════════════════════════════
+  // DARK MODE (GECE MODU) RENKLERİ
+  // ════════════════════════════════════════════════════
+
+  /// Derin gece mavisi (Arka Plan)
+  static const Color midnightNavy = Color(0xFF0B1120);
+
+  /// Gece mavisi cam efekti (Overlay) - *Kaldırılabilir, geriye dönük uyumluluk için var*
+  static const Color glassNavy = Color(0x660B1120);
+
+  /// Premium Glassmorphism gradyanı başlangıç (rgba(10, 15, 30, 0.85))
+  static const Color premiumGlassGradientStart = Color.fromRGBO(10, 15, 30, 0.85);
+
+  /// Premium Glassmorphism gradyanı bitiş (rgba(10, 15, 30, 0.60))
+  static const Color premiumGlassGradientEnd = Color.fromRGBO(10, 15, 30, 0.60);
+
+  /// Çok yumuşak parlama efekti (Glow)
+  static const Color premiumGlassGlow = Color.fromRGBO(196, 181, 253, 0.10);
+  
+  /// Premium kart gölgesi
+  static const Color premiumShadow = Color.fromRGBO(0, 0, 0, 0.40);
+
+  /// Yumuşak gece mavisi gradyanı başlangıç
+  static const Color softNavyGradientStart = Color(0xFF0A0F1F);
+  
+  /// Yumuşak gece mavisi gradyanı bitiş
+  static const Color softNavyGradientEnd = Color(0xFF111827);
+
+  /// Kirli beyaz (Birincil Başlıklar - Yumuşatılmış)
+  static const Color offWhite = Color(0xFFE2E8F0);
+
+  /// Lavanta grisi (İkincil Yazılar)
+  static const Color lavenderGrey = Color(0xFF94A3B8);
+
+  /// Yumuşak pastel mor (Vurgu - Yumuşatılmış)
+  static const Color pastelPurple = Color(0xFFC4B5FD);
+
+  /// Gün batımı turuncusu (Vurgu)
+  static const Color sunsetOrange = Color(0xFFFB923C);
 }
 

@@ -6,15 +6,15 @@ import 'puzzle_service.dart';
 
 class TaleService {
   // ─── Backend URL Ayarı ──────────────────────────────────────────
-  // 📱 Fiziksel cihaz (aynı WiFi):   http://192.168.0.136:3000/api
-  // 🖥️  Android Emülatör:            http://10.0.2.2:3000/api
+  // 📱 Fiziksel cihaz (aynı WiFi):   http://10.237.130.201:5000/api
+  // 🖥️  Android Emülatör:            http://10.0.2.2:5000/api
   //
   // Çalıştırırken override etmek için:
-  //   flutter run --dart-define=BASE_URL=http://192.168.0.136:3000/api
+  //   flutter run --dart-define=BASE_URL=http://10.237.130.201:5000/api
   // ────────────────────────────────────────────────────────────────
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'http://10.0.2.2:5000/api',
+    defaultValue: 'http://10.237.130.201:5000/api',
   );
 
   static Future<Map<String, dynamic>> generateTale({

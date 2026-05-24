@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../theme/app_colors.dart';
 import '../ready_tale_model.dart';
 import '../screens/ready_tale_detail_screen.dart';
 
@@ -46,14 +47,21 @@ class ReadyTaleCard extends StatelessWidget {
                   Container(
                     width: width,
                     height: width, // Kare yapmak için
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF9947EB), Color(0xFF6B2DBF)],
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).brightness == Brightness.dark 
+                                ? AppColors.midnightNavy.withAlpha(200) 
+                                : const Color(0xFF9947EB),
+                            Theme.of(context).brightness == Brightness.dark 
+                                ? AppColors.midnightNavy 
+                                : const Color(0xFF6B2DBF),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: tale.coverAsset != null
+                    child: tale.coverAsset != null && tale.coverAsset!.trim().isNotEmpty
                         ? Image.asset(
                             tale.coverAsset!,
                             fit: BoxFit.cover,
@@ -103,10 +111,12 @@ class ReadyTaleCard extends StatelessWidget {
 
             Text(
               displayTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A2E),
+                color: Theme.of(context).brightness == Brightness.dark 
+                    ? AppColors.offWhite 
+                    : const Color(0xFF1A1A2E),
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,

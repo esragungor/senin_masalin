@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_colors.dart';
+import '../widgets/star_background.dart';
+import '../main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Yeni Masal Oluştur — Adım 1: Kahraman Bilgileri
 /// Çocuğun adı, yaşı ve cinsiyeti alınır.
-class CreateTaleScreen extends StatefulWidget {
+class CreateTaleScreen extends ConsumerStatefulWidget {
   const CreateTaleScreen({super.key});
 
   @override
-  State<CreateTaleScreen> createState() => _CreateTaleScreenState();
+  ConsumerState<CreateTaleScreen> createState() => _CreateTaleScreenState();
 }
 
-class _CreateTaleScreenState extends State<CreateTaleScreen> {
+class _CreateTaleScreenState extends ConsumerState<CreateTaleScreen> {
   final TextEditingController _nameController = TextEditingController();
   double _age = 5;
   String? _gender; // 'kız' | 'erkek'
@@ -154,7 +158,8 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
     });
   }
 
-  Color get _dynamicBg {
+  Color _dynamicBg(bool isDark) {
+    if (isDark) return Colors.transparent;
     if (_gender == 'kız') return const Color(0xFFFFF0F5);
     if (_gender == 'erkek') return const Color(0xFFEEF6FF);
     return _bgColor;
@@ -162,28 +167,31 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      color: _dynamicBg,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
+    final isDark = ref.watch(sleepModeProvider);
+
+    return StarBackground(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        color: _dynamicBg(isDark),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
           backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: Color(0xFF1A1A2E), size: 20),
-          onPressed: () => context.pop(),
-        ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded,
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E), size: 20),
+            onPressed: () => context.pop(),
+          ),
         title: Column(
           children: [
-            const Text(
+            Text(
               'Yeni Masal Oluştur',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1A1A2E),
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
               ),
             ),
             const SizedBox(height: 2),
@@ -192,7 +200,7 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: _purple,
+                color: isDark ? AppColors.pastelPurple : _purple,
                 letterSpacing: 0.8,
               ),
             ),
@@ -201,8 +209,8 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.close_rounded,
-                color: Color(0xFF1A1A2E), size: 22),
+            icon: Icon(Icons.close_rounded,
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E), size: 22),
             onPressed: () => context.go('/home'),
           ),
         ],
@@ -210,8 +218,8 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
           preferredSize: const Size.fromHeight(4),
           child: LinearProgressIndicator(
             value: 1 / 3,
-            backgroundColor: const Color(0xFFE2E8F0),
-            valueColor: AlwaysStoppedAnimation<Color>(_purple),
+            backgroundColor: isDark ? AppColors.offWhite.withAlpha(30) : const Color(0xFFE2E8F0),
+            valueColor: AlwaysStoppedAnimation<Color>(isDark ? AppColors.pastelPurple : _purple),
             minHeight: 4,
           ),
         ),
@@ -228,19 +236,19 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: _purple.withAlpha(20),
+                    color: (isDark ? AppColors.pastelPurple : _purple).withAlpha(20),
                     shape: BoxShape.circle,
                   ),
                   child:
-                      const Icon(Icons.person_rounded, color: _purple, size: 20),
+                      Icon(Icons.person_rounded, color: isDark ? AppColors.pastelPurple : _purple, size: 20),
                 ),
                 const SizedBox(width: 10),
-                const Text(
+                Text(
                   'Kahraman kim?',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A2E),
+                    color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
                   ),
                 ),
               ],
@@ -249,19 +257,20 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
             const SizedBox(height: 28),
 
             // ── Çocuğunuzun Adı ───────────────────────────────
-            const Text(
+            Text(
               'Çocuğunuzun Adı',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
               ),
             ),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? AppColors.midnightNavy.withAlpha(150) : Colors.white,
                 borderRadius: BorderRadius.circular(14),
+                border: isDark ? Border.all(color: AppColors.pastelPurple.withAlpha(50), width: 1) : null,
                 boxShadow: [
                   BoxShadow(
                       color: Colors.black.withAlpha(8),
@@ -272,8 +281,8 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
               child: TextField(
                 controller: _nameController,
                 onChanged: (_) => setState(() {}),
-                style: const TextStyle(
-                    fontSize: 16, color: Color(0xFF1A1A2E)),
+                style: TextStyle(
+                    fontSize: 16, color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E)),
                 decoration: InputDecoration(
                   hintText: 'Örn. Esra, Leo, Ali...',
                   hintStyle: const TextStyle(
@@ -285,7 +294,7 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: isDark ? Colors.transparent : Colors.white,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
                 ),
@@ -298,12 +307,12 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Yaş',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A2E),
+                    color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
                   ),
                 ),
                 RichText(
@@ -311,10 +320,10 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                     children: [
                       TextSpan(
                         text: '${_age.round()}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: _purple,
+                          color: isDark ? AppColors.pastelPurple : _purple,
                         ),
                       ),
                       const TextSpan(
@@ -332,13 +341,12 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
             const SizedBox(height: 4),
             SliderTheme(
               data: SliderTheme.of(context).copyWith(
-                activeTrackColor: _purple,
-                inactiveTrackColor: _lightPurple,
-                thumbColor: _purple,
-                overlayColor: _purple.withAlpha(30),
+                activeTrackColor: isDark ? AppColors.pastelPurple : _purple,
+                inactiveTrackColor: isDark ? AppColors.offWhite.withAlpha(30) : _lightPurple,
+                thumbColor: isDark ? AppColors.pastelPurple : _purple,
+                overlayColor: (isDark ? AppColors.pastelPurple : _purple).withAlpha(30),
                 trackHeight: 6,
-                thumbShape:
-                    const RoundSliderThumbShape(enabledThumbRadius: 10),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
               ),
               child: Slider(
                 value: _age,
@@ -348,17 +356,13 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                 onChanged: (v) => setState(() => _age = v),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('2',
-                      style: TextStyle(
-                          fontSize: 12, color: Color(0xFFB0BAC9))),
-                  Text('12',
-                      style: TextStyle(
-                          fontSize: 12, color: Color(0xFFB0BAC9))),
+                  Text('2', style: TextStyle(fontSize: 12, color: isDark ? AppColors.lavenderGrey.withAlpha(150) : const Color(0xFFB0BAC9))),
+                  Text('12', style: TextStyle(fontSize: 12, color: isDark ? AppColors.lavenderGrey.withAlpha(150) : const Color(0xFFB0BAC9))),
                 ],
               ),
             ),
@@ -366,12 +370,12 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
             const SizedBox(height: 28),
 
             // ── Cinsiyet Seçimi ────────────────────────────
-            const Text(
+            Text(
               'Cinsiyet',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
               ),
             ),
             const SizedBox(height: 12),
@@ -384,7 +388,8 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                     isSelected: _gender == 'kız',
                     onTap: () => setState(() => _gender = 'kız'),
                     activeColor: const Color(0xFFFF6B9E),
-                    activeBgColor: const Color(0xFFFFF0F5),
+                    activeBgColor: isDark ? const Color(0xFF4D1D2F) : const Color(0xFFFFF0F5),
+                    isDark: isDark,
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -394,8 +399,9 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                     emoji: '👦',
                     isSelected: _gender == 'erkek',
                     onTap: () => setState(() => _gender = 'erkek'),
-                    activeColor: const Color(0xFF3B82F6), // Darker, clear blue
-                    activeBgColor: const Color(0xFFDBEAFE), // Subtly darker soft background
+                    activeColor: const Color(0xFF3B82F6),
+                    activeBgColor: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFDBEAFE),
+                    isDark: isDark,
                   ),
                 ),
               ],
@@ -404,12 +410,12 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
             const SizedBox(height: 28),
 
             // ── Temalar (Yatay Kaydırmalı) ────────────────
-            const Text(
+            Text(
               'Nasıl bir masal olsun?',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A2E),
+                color: isDark ? AppColors.offWhite : const Color(0xFF1A1A2E),
               ),
             ),
             const SizedBox(height: 12),
@@ -434,10 +440,10 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                           height: 76,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: theme['bg'],
+                            color: isDark ? (theme['bg'] as Color).withAlpha(40) : theme['bg'],
                             border: Border.all(
-                              color: isSelected ? _purple : Colors.white,
-                              width: isSelected ? 3 : 3,
+                              color: isSelected ? (isDark ? AppColors.pastelPurple : _purple) : (isDark ? Colors.white10 : Colors.white),
+                              width: 3,
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -460,7 +466,7 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                            color: isSelected ? _purple : const Color(0xFF8A94A6),
+                            color: isSelected ? (isDark ? AppColors.pastelPurple : _purple) : (isDark ? AppColors.lavenderGrey : const Color(0xFF8A94A6)),
                           ),
                         ),
                       ],
@@ -479,19 +485,20 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
               child: ElevatedButton(
                 onPressed: _isValid ? _onDevam : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _purple,
-                  disabledBackgroundColor: _lightPurple,
+                  backgroundColor: isDark ? AppColors.pastelPurple : _purple,
+                  disabledBackgroundColor: isDark ? AppColors.pastelPurple.withAlpha(50) : _lightPurple,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Devam Et →',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: _isValid ? Colors.white : (isDark ? Colors.white38 : Colors.grey),
                   ),
                 ),
               ),
@@ -501,8 +508,9 @@ class _CreateTaleScreenState extends State<CreateTaleScreen> {
           ],
         ),
       ),
-      ),     // closes Scaffold
-    );       // closes AnimatedContainer
+    ),     // closes Scaffold
+    ),       // closes AnimatedContainer
+    );       // closes StarBackground
   }
 }
 
@@ -514,6 +522,7 @@ class _GenderCard extends StatelessWidget {
   final VoidCallback onTap;
   final Color activeColor;
   final Color activeBgColor;
+  final bool isDark;
 
   const _GenderCard({
     required this.label,
@@ -522,6 +531,7 @@ class _GenderCard extends StatelessWidget {
     required this.onTap,
     required this.activeColor,
     required this.activeBgColor,
+    required this.isDark,
   });
 
   @override
@@ -532,10 +542,12 @@ class _GenderCard extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: isSelected ? activeBgColor : Colors.white,
+          color: isSelected 
+              ? activeBgColor 
+              : (isDark ? AppColors.midnightNavy.withAlpha(150) : Colors.white),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? activeColor : const Color(0xFFE2E8F0),
+            color: isSelected ? activeColor : (isDark ? Colors.white10 : const Color(0xFFE2E8F0)),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -555,7 +567,7 @@ class _GenderCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? activeColor : const Color(0xFF1A1A2E),
+                color: isSelected ? activeColor : (isDark ? AppColors.offWhite : const Color(0xFF1A1A2E)),
               ),
             ),
           ],
